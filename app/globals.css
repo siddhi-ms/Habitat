@@ -19,8 +19,27 @@
   }
 }
 
+/* --- HEIGHT RESET & MAP FIXES --- */
+html, 
 body {
+  height: 100%; /* Critical for absolute positioned maps */
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevents double scrollbars in a dashboard view */
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Next.js App Router wrapper fix */
+main {
+  height: 100%;
+  width: 100%;
+}
+
+/* Ensure MapLibre canvas is always visible */
+.maplibregl-canvas {
+  width: 100% !important;
+  height: 100% !important;
+  outline: none;
 }
