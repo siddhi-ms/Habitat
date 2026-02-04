@@ -66,16 +66,18 @@ export function deriveSuitability(props: DistrictProps): SuitabilityInsight {
 
   const strategy: string[] = [];
   if (props.climate_risk === "High" || props.avg_rainfall < 650) {
-    strategy.push("Drought-resistant native species mix");
-    strategy.push("Early-stage irrigation / moisture conservation (mulch, contour)");
+    strategy.push("Water conservation and drought mitigation focus");
+    strategy.push("Land preparation with moisture retention techniques");
   } else {
-    strategy.push("Native multi-strata plantation (canopy + understory)");
-    strategy.push("Assisted natural regeneration where feasible");
+    strategy.push("Suitable for diverse reforestation strategies");
+    strategy.push("Natural regeneration potential");
   }
   if (props.fertility_index === "Low") {
-    strategy.push("Soil restoration: compost + cover crops + reduced till");
+    strategy.push("Soil restoration recommended before planting");
   } else if (props.fertility_index === "Medium") {
-    strategy.push("Targeted soil amendments in establishment zones");
+    strategy.push("Consider soil amendments in critical zones");
+  } else {
+    strategy.push("Strong soil foundation for establishment");
   }
 
   const summary = [

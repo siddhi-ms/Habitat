@@ -16,11 +16,27 @@ import {
 } from "./geo";
 import { deriveSuitability } from "./scoring";
 import type { DistrictPanelData } from "./DistrictInfoPanel";
+import type { SearchLocation } from "./SearchBar";
+import {
+  getSindhudurgTalukasGeoJSON,
+  getSindhudurgVillagesGeoJSON,
+  type Taluka,
+  type Village,
+  getRainfallColor,
+  getTemperatureColor,
+  getSoilFertilityColor,
+  getClimateRiskColor,
+  getSuitabilityColor,
+  getVillagesByTaluka,
+} from "./sindhudurgTalukas";
 
-type ViewMode = "india" | "maharashtra";
+type ViewMode = "india" | "maharashtra" | "sindhudurg" | "taluka" | "village";
 
 const INDIA_CENTER: [number, number] = [78.9629, 21.5937];
 const MAHARASHTRA_CENTER: [number, number] = [75.7139, 19.7515];
+// Centered on Sindhudurg district - proper bounds coverage
+const SINDHUDURG_CENTER: [number, number] = [73.61, 16.09];
+const SINDHUDURG_ZOOM: number = 10.8;
 
 const LAYERS = {
   statesFill: "states-fill",
@@ -28,6 +44,11 @@ const LAYERS = {
   districtsFill: "districts-fill",
   districtsOutline: "districts-outline",
   districtsHover: "districts-hover",
+  talukasFill: "talukas-fill",
+  talukasOutline: "talukas-outline",
+  talukasHover: "talukas-hover",
+  villagesCircle: "villages-circle",
+  villagesLabel: "villages-label",
 };
 
 function rainfallColorExpression() {
@@ -78,7 +99,43 @@ function climateColorExpression() {
 function overlayExpression(mode: OverlayMode) {
   if (mode === "rainfall") return rainfallColorExpression();
   if (mode === "climate") return climateColorExpression();
+  if (mode === "temperature") return temperatureColorExpression();
+  if (mode === "suitability") return suitabilityColorExpression();
   return fertilityColorExpression();
+}
+
+function temperatureColorExpression() {
+  return [
+    "interpolate",
+    ["linear"],
+    ["coalesce", ["get", "avg_temp"], 26],
+    24,
+    "#bae6fd", // cool blue
+    27,
+    "#a7f3d0", // comfortable green
+    30,
+    "#fef08a", // warm yellow
+    33,
+    "#fecaca", // hot red
+  ] as const;
+}
+
+function suitabilityColorExpression() {
+  return [
+    "interpolate",
+    ["linear"],
+    ["coalesce", ["get", "suitability_score"], 70],
+    0,
+    "#fecaca", // poor red
+    40,
+    "#fef08a", // fair yellow
+    60,
+    "#a7f3d0", // good green
+    75,
+    "#6ee7b7", // excellent teal
+    100,
+    "#34d399", // outstanding
+  ] as const;
 }
 
 function toDistrictPanelData(props: DistrictProps): DistrictPanelData {
@@ -96,16 +153,71 @@ export function MapContainer({
   overlay,
   onDistrictSelect,
   onDistrictClear,
+  onTalukaSelect,
+  onTalukaClear,
+  searchLocation,
 }: {
   overlay: OverlayMode;
   onDistrictSelect: (data: DistrictPanelData) => void;
   onDistrictClear: () => void;
+  onTalukaSelect?: (taluka: Taluka) => void;
+  onTalukaClear?: () => void;
+  searchLocation?: SearchLocation | null;
 }) {
   const mapRef = useRef<Map | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const [viewMode, setViewMode] = useState<ViewMode>("india");
+  const [currentTaluka, setCurrentTaluka] = useState<Taluka | null>(null);
   const [tooltip, setTooltip] = useState<TooltipData | null>(null);
+  const [userInteracting, setUserInteracting] = useState(false);
+
+  // Handle search location changes - prevent animation conflicts and stay zoomed
+  useEffect(() => {
+    if (!searchLocation || !mapRef.current) return;
+    
+    const map = mapRef.current;
+    const { center, zoom, type } = searchLocation;
+    
+    // Stop any ongoing animations
+    map.stop();
+    
+    // Mark as user interaction to prevent auto zoom-out
+    setUserInteracting(true);
+    
+    // Update view mode based on search type
+    if (type === "district") {
+      setViewMode("sindhudurg");
+    } else if (type === "taluka") {
+      setViewMode("taluka");
+    } else if (type === "village") {
+      setViewMode("village");
+    }
+    
+    // Update layer visibility immediately before animation
+    if (type === "district" || type === "taluka" || type === "village") {
+      map.setLayoutProperty(LAYERS.talukasFill, "visibility", "visible");
+      map.setLayoutProperty(LAYERS.talukasOutline, "visibility", "visible");
+      map.setLayoutProperty("talukas-labels", "visibility", "visible");
+    }
+    
+    if (type === "taluka" || type === "village") {
+      map.setLayoutProperty(LAYERS.villagesCircle, "visibility", "visible");
+      map.setLayoutProperty(LAYERS.villagesLabel, "visibility", "visible");
+    }
+    
+    // Zoom and STAY at the searched location
+    map.easeTo({
+      center,
+      zoom,
+      pitch: type === "village" ? 30 : type === "taluka" ? 20 : 15,
+      duration: 1200,
+      essential: true,
+    });
+    
+    // Reset interaction flag after animation
+    setTimeout(() => setUserInteracting(false), 1400);
+  }, [searchLocation]);
 
   const legend = useMemo(() => {
     if (overlay === "none") {
@@ -118,12 +230,28 @@ export function MapContainer({
     }
     if (overlay === "rainfall") {
       return {
-        title: "Rainfall (mm/year)",
-        items: [
+        title: viewMode === "sindhudurg" ? "Rainfall (90-day mm)" : "Rainfall (mm/year)",
+        items: viewMode === "sindhudurg" ? [
+          { label: "< 1000", color: "#fef08a" },
+          { label: "1000-1150", color: "#a7f3d0" },
+          { label: "1150-1250", color: "#6ee7b7" },
+          { label: "> 1250", color: "#34d399" },
+        ] : [
           { label: "≤ 500", color: "#fed7aa" },
           { label: "800", color: "#fde68a" },
           { label: "1000", color: "#a7f3d0" },
           { label: "≥ 1300", color: "#bae6fd" },
+        ],
+      };
+    }
+    if (overlay === "temperature") {
+      return {
+        title: "Temperature (°C)",
+        items: [
+          { label: "< 24", color: "#bae6fd" },
+          { label: "24-27", color: "#a7f3d0" },
+          { label: "27-30", color: "#fef08a" },
+          { label: "> 30", color: "#fecaca" },
         ],
       };
     }
@@ -137,6 +265,17 @@ export function MapContainer({
         ],
       };
     }
+    if (overlay === "suitability") {
+      return {
+        title: "Land Suitability",
+        items: [
+          { label: "Poor (0-40)", color: "#fecaca" },
+          { label: "Fair (40-60)", color: "#fef08a" },
+          { label: "Good (60-75)", color: "#a7f3d0" },
+          { label: "Excellent (75+)", color: "#6ee7b7" },
+        ],
+      };
+    }
     return {
       title: "Soil fertility index",
       items: [
@@ -145,7 +284,7 @@ export function MapContainer({
         { label: "Low", color: "#fed7aa" },
       ],
     };
-  }, [overlay]);
+  }, [overlay, viewMode]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -201,7 +340,7 @@ export function MapContainer({
       center: INDIA_CENTER,
       zoom: 4.2,
       minZoom: 3.5,
-      maxZoom: 12,
+      maxZoom: 18, // Increase max zoom for village/land-level exploration
       attributionControl: false,
     });
 
@@ -227,6 +366,18 @@ export function MapContainer({
       map.addSource("mh-districts", {
         type: "geojson",
         data: MAHARASHTRA_DISTRICTS_GEOJSON as unknown as GeoJSON.FeatureCollection,
+      });
+      
+      // Sindhudurg talukas source (loaded but hidden until Sindhudurg view)
+      map.addSource("sindhudurg-talukas", {
+        type: "geojson",
+        data: getSindhudurgTalukasGeoJSON() as unknown as GeoJSON.FeatureCollection,
+      });
+
+      // Sindhudurg villages source (point features for village-level exploration)
+      map.addSource("sindhudurg-villages", {
+        type: "geojson",
+        data: getSindhudurgVillagesGeoJSON() as unknown as GeoJSON.FeatureCollection,
       });
 
       // India states - hidden by default, shows data when overlay is selected
@@ -332,6 +483,147 @@ export function MapContainer({
         },
       });
 
+      // Sindhudurg talukas (hidden until Sindhudurg view)
+      map.addLayer({
+        id: LAYERS.talukasFill,
+        type: "fill",
+        source: "sindhudurg-talukas",
+        layout: { visibility: "none" },
+        paint: {
+          "fill-color": [
+            "interpolate",
+            ["linear"],
+            ["get", "rainfall_90d"],
+            1000,
+            "#fef08a",
+            1150,
+            "#a7f3d0",
+            1250,
+            "#6ee7b7",
+            1350,
+            "#34d399",
+          ] as unknown as ExpressionSpecification,
+          "fill-opacity": 0.6,
+        },
+      });
+
+      map.addLayer({
+        id: LAYERS.talukasOutline,
+        type: "line",
+        source: "sindhudurg-talukas",
+        layout: { visibility: "none" },
+        paint: {
+          "line-color": "#FFD700",
+          "line-width": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            10, 2,
+            12, 3,
+            14, 4,
+          ],
+          "line-opacity": 0.95,
+        },
+      });
+
+      map.addLayer({
+        id: LAYERS.talukasHover,
+        type: "line",
+        source: "sindhudurg-talukas",
+        layout: { visibility: "none" },
+        paint: {
+          "line-color": "#34d399",
+          "line-width": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            10, 4,
+            12, 5,
+            14, 6,
+          ],
+          "line-opacity": 1,
+        },
+        filter: ["==", ["get", "id"], ""],
+      });
+
+      // Add taluka labels
+      map.addLayer({
+        id: "talukas-labels",
+        type: "symbol",
+        source: "sindhudurg-talukas",
+        layout: {
+          visibility: "none",
+          "text-field": ["get", "name"],
+          "text-font": ["Open Sans Bold", "Arial Unicode MS Regular"],
+          "text-size": 12,
+          "text-anchor": "center",
+        },
+        paint: {
+          "text-color": "#FFFFFF",
+          "text-halo-color": "#000000",
+          "text-halo-width": 2,
+        },
+      });
+
+      // Village markers (circles)
+      map.addLayer({
+        id: LAYERS.villagesCircle,
+        type: "circle",
+        source: "sindhudurg-villages",
+        layout: { visibility: "none" },
+        paint: {
+          "circle-radius": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            10, 3,
+            12, 5,
+            14, 7,
+            16, 10,
+          ],
+          "circle-color": [
+            "interpolate",
+            ["linear"],
+            ["get", "suitability_score"],
+            0, "#fecaca",
+            80, "#fef08a",
+            85, "#a7f3d0",
+            90, "#6ee7b7",
+          ] as unknown as ExpressionSpecification,
+          "circle-stroke-color": "#ffffff",
+          "circle-stroke-width": 1.5,
+          "circle-opacity": 0.85,
+        },
+      });
+
+      // Village labels
+      map.addLayer({
+        id: LAYERS.villagesLabel,
+        type: "symbol",
+        source: "sindhudurg-villages",
+        layout: {
+          visibility: "none",
+          "text-field": ["get", "name"],
+          "text-font": ["Open Sans Regular", "Arial Unicode MS Regular"],
+          "text-size": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            10, 0,
+            12, 10,
+            14, 11,
+            16, 12,
+          ],
+          "text-anchor": "top",
+          "text-offset": [0, 0.8],
+        },
+        paint: {
+          "text-color": "#FFFFFF",
+          "text-halo-color": "#000000",
+          "text-halo-width": 2,
+        },
+      });
+
       const switchToMaharashtra = () => {
         if (!mapRef.current) return;
         setViewMode("maharashtra");
@@ -373,6 +665,122 @@ export function MapContainer({
         }, 520);
       };
 
+      const switchToSindhudurg = () => {
+        if (!mapRef.current) return;
+        const m = mapRef.current;
+        
+        // Stop any ongoing animations
+        m.stop();
+        
+        setViewMode("sindhudurg");
+        onDistrictClear();
+
+        // Hide district layers immediately
+        m.setLayoutProperty(LAYERS.districtsFill, "visibility", "none");
+        m.setLayoutProperty(LAYERS.districtsOutline, "visibility", "none");
+        m.setLayoutProperty(LAYERS.districtsHover, "visibility", "none");
+        m.setLayoutProperty("districts-labels", "visibility", "none");
+        
+        // Show taluka layers immediately
+        m.setLayoutProperty(LAYERS.talukasFill, "visibility", "visible");
+        m.setLayoutProperty(LAYERS.talukasOutline, "visibility", "visible");
+        m.setLayoutProperty(LAYERS.talukasHover, "visibility", "visible");
+        m.setLayoutProperty("talukas-labels", "visibility", "visible");
+        
+        // Update taluka colors
+        updateTalukaColors(overlay);
+
+        // Then animate camera
+        m.easeTo({
+          center: SINDHUDURG_CENTER,
+          zoom: SINDHUDURG_ZOOM,
+          pitch: 30,
+          bearing: 0,
+          duration: 1200,
+          essential: true,
+        });
+      };
+
+      const updateTalukaColors = (mode: OverlayMode) => {
+        const m = mapRef.current;
+        if (!m || !m.getLayer(LAYERS.talukasFill)) return;
+        
+        let colorExpression: ExpressionSpecification;
+        
+        switch (mode) {
+          case "rainfall":
+            colorExpression = [
+              "interpolate",
+              ["linear"],
+              ["get", "rainfall_90d"],
+              1000, "#fef08a",
+              1150, "#a7f3d0",
+              1250, "#6ee7b7",
+              1350, "#34d399",
+            ] as unknown as ExpressionSpecification;
+            break;
+          case "temperature":
+            colorExpression = [
+              "interpolate",
+              ["linear"],
+              ["get", "avg_temp"],
+              25, "#bae6fd",
+              26, "#a7f3d0",
+              27, "#fef08a",
+              28, "#fecaca",
+            ] as unknown as ExpressionSpecification;
+            break;
+          case "fertility":
+            colorExpression = [
+              "interpolate",
+              ["linear"],
+              ["get", "fertility_score"],
+              0, "#fed7aa",
+              70, "#fef08a",
+              80, "#a7f3d0",
+              85, "#bbf7d0",
+              100, "#6ee7b7",
+            ] as unknown as ExpressionSpecification;
+            break;
+          case "climate":
+            colorExpression = [
+              "interpolate",
+              ["linear"],
+              ["get", "climate_risk_score"],
+              0, "#a7f3d0",
+              12, "#fef08a",
+              18, "#fed7aa",
+              25, "#fecaca",
+              100, "#ef4444",
+            ] as unknown as ExpressionSpecification;
+            break;
+          case "suitability":
+            colorExpression = [
+              "interpolate",
+              ["linear"],
+              ["get", "suitability_score"],
+              0, "#fecaca",
+              80, "#fef08a",
+              84, "#a7f3d0",
+              87, "#6ee7b7",
+              100, "#34d399",
+            ] as unknown as ExpressionSpecification;
+            break;
+          default:
+            colorExpression = [
+              "interpolate",
+              ["linear"],
+              ["get", "rainfall_90d"],
+              1000, "#fef08a",
+              1150, "#a7f3d0",
+              1250, "#6ee7b7",
+              1350, "#34d399",
+            ] as unknown as ExpressionSpecification;
+        }
+        
+        m.setPaintProperty(LAYERS.talukasFill, "fill-color", colorExpression);
+      };
+
       map.on("click", LAYERS.statesFill, (e: MapLayerMouseEvent) => {
         const f = e.features?.[0];
         if (!f?.properties) return;
@@ -380,17 +788,34 @@ export function MapContainer({
         if (p.name === "Maharashtra") switchToMaharashtra();
       });
 
+      // Smart zoom-based view mode switching - only when user manually zooms
       map.on("zoomend", () => {
         const m = mapRef.current;
         if (!m) return;
-        if (viewMode === "india" && m.getZoom() >= 6.2) {
+        
+        const zoom = m.getZoom();
+        const center = m.getCenter();
+        
+        // Check if we're within Sindhudurg bounds
+        const inSindhudurg = center.lng >= 73.2 && center.lng <= 74.0 && 
+                             center.lat >= 15.6 && center.lat <= 16.6;
+        
+        // Only auto-transition on manual scroll zoom from India view
+        if (viewMode === "india" && zoom >= 6.2 && !userInteracting) {
           switchToMaharashtra();
+        } else if ((viewMode === "sindhudurg" || viewMode === "taluka") && zoom >= 12.5 && inSindhudurg) {
+          // Show villages at high zoom level
+          m.setLayoutProperty(LAYERS.villagesCircle, "visibility", "visible");
+          m.setLayoutProperty(LAYERS.villagesLabel, "visibility", "visible");
         }
       });
 
       map.on("mousemove", (e) => {
         const m = mapRef.current;
         if (!m) return;
+
+        // Skip if we're in Sindhudurg view (patches handle their own hover)
+        if (viewMode === "sindhudurg") return;
 
         const layers = viewMode === "maharashtra" ? [LAYERS.districtsFill] : [LAYERS.statesFill];
         const features = m.queryRenderedFeatures(e.point, { layers });
@@ -435,6 +860,9 @@ export function MapContainer({
               { label: "Fertility", value: p.fertility_index },
               { label: "Climate risk", value: p.climate_risk },
               { label: "Suitability", value: `${deriveSuitability(p).score}/100` },
+              p.name === "Sindhudurg" 
+                ? { label: "Action", value: "Click for land analysis" }
+                : { label: "Action", value: "Click for details" },
             ],
           });
         }
@@ -444,7 +872,176 @@ export function MapContainer({
         const f = e.features?.[0];
         if (!f?.properties) return;
         const p = f.properties as unknown as DistrictProps;
-        onDistrictSelect(toDistrictPanelData(p));
+        
+        // Check if clicked district is Sindhudurg
+        if (p.name === "Sindhudurg") {
+          switchToSindhudurg();
+        } else {
+          onDistrictSelect(toDistrictPanelData(p));
+        }
+      });
+
+      // Taluka click handler - zoom into taluka and STAY there
+      map.on("click", LAYERS.talukasFill, (e: MapLayerMouseEvent) => {
+        const f = e.features?.[0];
+        if (!f?.properties) return;
+        const props = f.properties;
+        
+        const m = mapRef.current;
+        if (!m) return;
+        
+        // Stop any ongoing animations
+        m.stop();
+        
+        // Mark as user-initiated interaction
+        setUserInteracting(true);
+        
+        // Reconstruct taluka data
+        const talukaData: Taluka = {
+          id: props.id,
+          name: props.name,
+          center: [props.center_lng, props.center_lat],
+          bounds: { minLng: 0, maxLng: 0, minLat: 0, maxLat: 0 },
+          rainfall_90d: props.rainfall_90d,
+          avg_temp: props.avg_temp,
+          soil_carbon: props.soil_carbon,
+          soil_nitrogen: props.soil_nitrogen,
+          soil_ph: props.soil_ph,
+          drought_index: props.drought_index,
+          heat_stress: props.heat_stress,
+          fertility_score: props.fertility_score,
+          climate_risk_score: props.climate_risk_score,
+          suitability_score: props.suitability_score,
+        };
+        
+        setCurrentTaluka(talukaData);
+        setViewMode("taluka");
+        
+        // Show village markers immediately
+        m.setLayoutProperty(LAYERS.villagesCircle, "visibility", "visible");
+        m.setLayoutProperty(LAYERS.villagesLabel, "visibility", "visible");
+        
+        // Zoom in and LOCK at this level
+        m.easeTo({
+          center: talukaData.center,
+          zoom: 13.5,
+          pitch: 20,
+          duration: 1000,
+          essential: true,
+        });
+        
+        // Reset interaction flag after animation completes
+        setTimeout(() => setUserInteracting(false), 1200);
+        
+        // Trigger panel if handler exists
+        if (onTalukaSelect) {
+          onTalukaSelect(talukaData);
+        }
+      });
+
+      // Taluka hover handler
+      map.on("mousemove", LAYERS.talukasFill, (e: MapLayerMouseEvent) => {
+        const m = mapRef.current;
+        if (!m) return;
+        
+        const f = e.features?.[0];
+        if (!f?.properties) return;
+        
+        const taluka = f.properties as unknown as Record<string, unknown>;
+        m.getCanvas().style.cursor = "pointer";
+        m.setFilter(LAYERS.talukasHover, ["==", ["get", "id"], taluka.id as string]);
+        
+        setTooltip({
+          title: taluka.name as string,
+          x: e.point.x,
+          y: e.point.y,
+          lines: [
+            { label: "Rainfall (90d)", value: `${taluka.rainfall_90d} mm` },
+            { label: "Temperature", value: `${taluka.avg_temp}°C` },
+            { label: "Fertility", value: `${taluka.fertility_score}/100` },
+            { label: "Suitability", value: `${taluka.suitability_score}/100` },
+            { label: "Action", value: "Click for details" },
+          ],
+        });
+      });
+
+      map.on("mouseleave", LAYERS.talukasFill, () => {
+        const m = mapRef.current;
+        if (!m) return;
+        m.getCanvas().style.cursor = "";
+        m.setFilter(LAYERS.talukasHover, ["==", ["get", "id"], ""]);
+        if (viewMode === "sindhudurg") {
+          setTooltip(null);
+        }
+      });
+
+      // Village click handler - zoom to village level and STAY
+      map.on("click", LAYERS.villagesCircle, (e: MapLayerMouseEvent) => {
+        const f = e.features?.[0];
+        if (!f?.properties) return;
+        const village = f.properties as unknown as Record<string, unknown>;
+        
+        const m = mapRef.current;
+        if (!m) return;
+        
+        // Stop any ongoing animations
+        m.stop();
+        
+        // Mark as user-initiated interaction
+        setUserInteracting(true);
+        
+        setViewMode("village");
+        
+        const villageLng = village.center_lng as number;
+        const villageLat = village.center_lat as number;
+        const center: [number, number] = villageLng && villageLat 
+          ? [villageLng, villageLat] 
+          : e.lngLat.toArray() as [number, number];
+        
+        // Zoom in and LOCK at this level
+        m.easeTo({
+          center,
+          zoom: 15.5,
+          pitch: 30,
+          duration: 800,
+          essential: true,
+        });
+        
+        // Reset interaction flag after animation completes
+        setTimeout(() => setUserInteracting(false), 1000);
+      });
+
+      // Village hover handler
+      map.on("mousemove", LAYERS.villagesCircle, (e: MapLayerMouseEvent) => {
+        const m = mapRef.current;
+        if (!m) return;
+        
+        const f = e.features?.[0];
+        if (!f?.properties) return;
+        
+        const village = f.properties as unknown as Record<string, unknown>;
+        m.getCanvas().style.cursor = "pointer";
+        
+        setTooltip({
+          title: village.name as string,
+          x: e.point.x,
+          y: e.point.y,
+          lines: [
+            { label: "Population", value: `${village.population || "N/A"}` },
+            { label: "Area", value: `${village.area_sqkm || "N/A"} km²` },
+            { label: "Rainfall (90d)", value: `${village.rainfall_90d} mm` },
+            { label: "Soil Fertility", value: `${village.soil_fertility}/100` },
+            { label: "Suitability", value: `${village.suitability_score}/100` },
+            { label: "Action", value: "Click to explore land" },
+          ],
+        });
+      });
+
+      map.on("mouseleave", LAYERS.villagesCircle, () => {
+        const m = mapRef.current;
+        if (!m) return;
+        m.getCanvas().style.cursor = "";
+        setTooltip(null);
       });
 
       map.on("click", (e) => {
@@ -475,6 +1072,89 @@ export function MapContainer({
       "fill-color",
       overlayExpression(overlay) as unknown as ExpressionSpecification,
     );
+  }, [overlay, viewMode]);
+
+  // Update taluka colors when overlay changes in Sindhudurg view
+  useEffect(() => {
+    const m = mapRef.current;
+    if (!m) return;
+    if (viewMode !== "sindhudurg") return;
+    if (!m.getLayer(LAYERS.talukasFill)) return;
+    
+    let colorExpression: ExpressionSpecification;
+    
+    switch (overlay) {
+      case "rainfall":
+        colorExpression = [
+          "interpolate",
+          ["linear"],
+          ["get", "rainfall_90d"],
+          1000, "#fef08a",
+          1150, "#a7f3d0",
+          1250, "#6ee7b7",
+          1350, "#34d399",
+        ] as unknown as ExpressionSpecification;
+        break;
+      case "temperature":
+        colorExpression = [
+          "interpolate",
+          ["linear"],
+          ["get", "avg_temp"],
+          25, "#bae6fd",
+          26, "#a7f3d0",
+          27, "#fef08a",
+          28, "#fecaca",
+        ] as unknown as ExpressionSpecification;
+        break;
+      case "fertility":
+        colorExpression = [
+          "interpolate",
+          ["linear"],
+          ["get", "fertility_score"],
+          0, "#fed7aa",
+          70, "#fef08a",
+          80, "#a7f3d0",
+          85, "#bbf7d0",
+          100, "#6ee7b7",
+        ] as unknown as ExpressionSpecification;
+        break;
+      case "climate":
+        colorExpression = [
+          "interpolate",
+          ["linear"],
+          ["get", "climate_risk_score"],
+          0, "#a7f3d0",
+          12, "#fef08a",
+          18, "#fed7aa",
+          25, "#fecaca",
+          100, "#ef4444",
+        ] as unknown as ExpressionSpecification;
+        break;
+      case "suitability":
+        colorExpression = [
+          "interpolate",
+          ["linear"],
+          ["get", "suitability_score"],
+          0, "#fecaca",
+          80, "#fef08a",
+          84, "#a7f3d0",
+          87, "#6ee7b7",
+          100, "#34d399",
+        ] as unknown as ExpressionSpecification;
+        break;
+      default:
+        colorExpression = [
+          "interpolate",
+          ["linear"],
+          ["get", "rainfall_90d"],
+          1000, "#fef08a",
+          1150, "#a7f3d0",
+          1250, "#6ee7b7",
+          1350, "#34d399",
+        ] as unknown as ExpressionSpecification;
+    }
+    
+    m.setPaintProperty(LAYERS.talukasFill, "fill-color", colorExpression);
   }, [overlay, viewMode]);
 
   // Toggle states fill layer visibility and color based on overlay selection
@@ -516,12 +1196,18 @@ export function MapContainer({
       <div className="pointer-events-none absolute left-5 top-24 z-20 hidden sm:block">
         <div className="pointer-events-auto w-[320px] rounded-2xl border border-white/10 bg-black/30 p-4 backdrop-blur">
           <div className="text-[11px] font-semibold tracking-wide text-zinc-200/75">
-            {viewMode === "india" ? "India overview" : "Maharashtra intelligence"}
+            {viewMode === "india" && "India overview"}
+            {viewMode === "maharashtra" && "Maharashtra districts"}
+            {viewMode === "sindhudurg" && "Sindhudurg • Taluka Analysis"}
+            {viewMode === "taluka" && `${currentTaluka?.name || "Taluka"} • Village Exploration`}
+            {viewMode === "village" && "Village • Land Patch Analysis"}
           </div>
           <div className="mt-1 text-sm text-zinc-50">
-            {viewMode === "india"
-              ? "Select an overlay above to visualize rainfall, soil fertility, or climate risk data across Indian states."
-              : "District-level attributes drive overlays. Hover for details; click for decision panel."}
+            {viewMode === "india" && "Select an overlay above to visualize rainfall, soil fertility, or climate risk data across Indian states."}
+            {viewMode === "maharashtra" && "District-level attributes drive overlays. Hover for details; click Sindhudurg for deep analysis."}
+            {viewMode === "sindhudurg" && "Taluka-level environmental data. Click any taluka to explore villages within it."}
+            {viewMode === "taluka" && "Village markers show locality-level data. Click a village to explore land patches."}
+            {viewMode === "village" && "Land-patch-level view for detailed environmental analysis and reforestation planning."}
           </div>
 
           <div className="mt-4">
@@ -541,13 +1227,37 @@ export function MapContainer({
             </div>
           </div>
 
-          <div className="mt-4 rounded-xl border border-white/10 bg-black/20 p-3 text-xs text-zinc-100/80">
-            <div className="font-semibold text-zinc-50">Demo note</div>
-            <div className="mt-1">
-              Data is read dynamically from GeoJSON feature properties (no hardcoded tooltip/panel
-              values).
+          {(viewMode === "sindhudurg" || viewMode === "taluka") && (
+            <div className="mt-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-zinc-100/90">
+              <div className="font-semibold text-emerald-300">
+                {viewMode === "sindhudurg" ? "Taluka Analysis Mode" : "Village Exploration Mode"}
+              </div>
+              <div className="mt-1">
+                {viewMode === "sindhudurg" 
+                  ? "Click any taluka to zoom in and explore villages within it. Continuous zoom and pan enabled."
+                  : "Click any village marker to zoom to land-level view. Zoom out to return to taluka view."}
+              </div>
             </div>
-          </div>
+          )}
+
+          {viewMode === "village" && (
+            <div className="mt-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-zinc-100/90">
+              <div className="font-semibold text-emerald-300">Land Exploration Mode</div>
+              <div className="mt-1">
+                Village-level land analysis active. Environmental data available for detailed reforestation planning. Zoom out to return to village view.
+              </div>
+            </div>
+          )}
+
+          {viewMode !== "sindhudurg" && viewMode !== "taluka" && viewMode !== "village" && (
+            <div className="mt-4 rounded-xl border border-white/10 bg-black/20 p-3 text-xs text-zinc-100/80">
+              <div className="font-semibold text-zinc-50">Navigation</div>
+              <div className="mt-1">
+                {viewMode === "india" && "Click Maharashtra to zoom into districts. Click any district for details."}
+                {viewMode === "maharashtra" && "Click Sindhudurg district to access in-depth land patch analysis for reforestation planning."}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

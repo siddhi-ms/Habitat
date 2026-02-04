@@ -4,13 +4,48 @@ import { useMemo, useState } from "react";
 import { MapContainer } from "./MapContainer";
 import { LayerToggle, type OverlayMode } from "./LayerToggle";
 import { DistrictInfoPanel, type DistrictPanelData } from "./DistrictInfoPanel";
+import { SearchBar, type SearchLocation } from "./SearchBar";
+import { TalukaInfoPanel } from "./TalukaInfoPanel";
+import type { Taluka } from "./sindhudurgTalukas";
 
 export default function LivePage() {
   const [overlay, setOverlay] = useState<OverlayMode>("none");
   const [panel, setPanel] = useState<DistrictPanelData | null>(null);
+  const [talukaPanel, setTalukaPanel] = useState<Taluka | null>(null);
+  const [showExtendedLayers, setShowExtendedLayers] = useState(false);
+  const [searchLocation, setSearchLocation] = useState<SearchLocation | null>(null);
+
+  const handleLocationSearch = (location: SearchLocation) => {
+    setSearchLocation(location);
+  };
+
+  const handleTalukaSelect = (taluka: Taluka) => {
+    setTalukaPanel(taluka);
+    setPanel(null); // Close district panel if open
+    setShowExtendedLayers(true); // Show extended layers in Sindhudurg view
+  };
+
+  const handleTalukaClear = () => {
+    setTalukaPanel(null);
+  };
+
+  const handleDistrictSelect = (data: DistrictPanelData) => {
+    setPanel(data);
+    setTalukaPanel(null); // Close taluka panel if open
+    
+    // Check if this is Sindhudurg
+    if (data.districtName === "Sindhudurg") {
+      setShowExtendedLayers(true);
+    }
+  };
+
+  const handleDistrictClear = () => {
+    setPanel(null);
+    setShowExtendedLayers(false);
+  };
 
   const headerSubtitle = useMemo(
-    () => "Live Intelligence Map • Planning phase decision support",
+    () => "Live Intelligence Map • City-level environmental analysis for Sindhudurg",
     [],
   );
 
@@ -23,13 +58,20 @@ export default function LivePage() {
               HABITAT • LIVE MODE
             </div>
             <div className="mt-0.5 text-lg font-semibold tracking-tight">
-              Adaptive Reforestation Intelligence — India → Maharashtra
+              Land Analysis Dashboard — Maharashtra → Sindhudurg
             </div>
             <div className="mt-1 text-sm text-zinc-200/80">{headerSubtitle}</div>
           </div>
 
-          <div className="pointer-events-auto hidden sm:block">
-            <LayerToggle value={overlay} onChange={setOverlay} />
+          <div className="flex flex-col gap-3 pointer-events-auto">
+            <SearchBar onLocationSelect={handleLocationSearch} />
+            <div className="hidden sm:block">
+              <LayerToggle 
+                value={overlay} 
+                onChange={setOverlay} 
+                showExtended={showExtendedLayers}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -37,15 +79,24 @@ export default function LivePage() {
       <div className="relative h-full w-full">
         <MapContainer
           overlay={overlay}
-          onDistrictSelect={(data) => setPanel(data)}
-          onDistrictClear={() => setPanel(null)}
+          onDistrictSelect={handleDistrictSelect}
+          onDistrictClear={handleDistrictClear}
+          onTalukaSelect={handleTalukaSelect}
+          onTalukaClear={handleTalukaClear}
+          searchLocation={searchLocation}
         />
 
         <div className="absolute bottom-4 left-4 z-20 pointer-events-auto sm:hidden">
-          <LayerToggle value={overlay} onChange={setOverlay} compact />
+          <LayerToggle 
+            value={overlay} 
+            onChange={setOverlay} 
+            compact 
+            showExtended={showExtendedLayers}
+          />
         </div>
 
-        <DistrictInfoPanel data={panel} onClose={() => setPanel(null)} />
+        <DistrictInfoPanel data={panel} onClose={handleDistrictClear} />
+        <TalukaInfoPanel taluka={talukaPanel} onClose={handleTalukaClear} />
       </div>
     </div>
   );
