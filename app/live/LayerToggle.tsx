@@ -1,6 +1,6 @@
 "use client";
 
-export type OverlayMode = "rainfall" | "fertility" | "climate";
+export type OverlayMode = "none" | "rainfall" | "fertility" | "climate";
 
 function ToggleButton({
   active,

@@ -25,26 +25,25 @@ const MAHARASHTRA_CENTER: [number, number] = [75.7139, 19.7515];
 const LAYERS = {
   statesFill: "states-fill",
   statesOutline: "states-outline",
-  mhOutline: "mh-outline",
   districtsFill: "districts-fill",
   districtsOutline: "districts-outline",
   districtsHover: "districts-hover",
 };
 
 function rainfallColorExpression() {
-  // Interpolate rainfall (mm) -> earth-toned wetness gradient.
+  // Interpolate rainfall (mm) -> pastel gradient.
   return [
     "interpolate",
     ["linear"],
     ["get", "avg_rainfall"],
     500,
-    "#7c2d12", // dry (brown)
+    "#fed7aa", // pastel peach (dry)
     800,
-    "#a16207", // amber
+    "#fde68a", // pastel yellow
     1000,
-    "#15803d", // green
+    "#a7f3d0", // pastel green
     1300,
-    "#0ea5e9", // blue (very wet)
+    "#bae6fd", // pastel blue (wet)
   ] as const;
 }
 
@@ -53,12 +52,12 @@ function fertilityColorExpression() {
     "match",
     ["get", "fertility_index"],
     "High",
-    "#22c55e",
+    "#bbf7d0", // pastel green
     "Medium",
-    "#84cc16",
+    "#fef08a", // pastel yellow
     "Low",
-    "#f59e0b",
-    "#64748b",
+    "#fed7aa", // pastel orange
+    "#e0e7ff", // pastel gray
   ] as const;
 }
 
@@ -67,12 +66,12 @@ function climateColorExpression() {
     "match",
     ["get", "climate_risk"],
     "Low",
-    "#34d399",
+    "#a7f3d0", // pastel green
     "Moderate",
-    "#fbbf24",
+    "#fef08a", // pastel yellow
     "High",
-    "#fb7185",
-    "#64748b",
+    "#fecaca", // pastel red
+    "#e0e7ff", // pastel gray
   ] as const;
 }
 
@@ -109,14 +108,22 @@ export function MapContainer({
   const [tooltip, setTooltip] = useState<TooltipData | null>(null);
 
   const legend = useMemo(() => {
+    if (overlay === "none") {
+      return {
+        title: "Select an overlay",
+        items: [
+          { label: "No data layer active", color: "transparent" },
+        ],
+      };
+    }
     if (overlay === "rainfall") {
       return {
         title: "Rainfall (mm/year)",
         items: [
-          { label: "≤ 500", color: "#7c2d12" },
-          { label: "800", color: "#a16207" },
-          { label: "1000", color: "#15803d" },
-          { label: "≥ 1300", color: "#0ea5e9" },
+          { label: "≤ 500", color: "#fed7aa" },
+          { label: "800", color: "#fde68a" },
+          { label: "1000", color: "#a7f3d0" },
+          { label: "≥ 1300", color: "#bae6fd" },
         ],
       };
     }
@@ -124,18 +131,18 @@ export function MapContainer({
       return {
         title: "Climate risk",
         items: [
-          { label: "Low", color: "#34d399" },
-          { label: "Moderate", color: "#fbbf24" },
-          { label: "High", color: "#fb7185" },
+          { label: "Low", color: "#a7f3d0" },
+          { label: "Moderate", color: "#fef08a" },
+          { label: "High", color: "#fecaca" },
         ],
       };
     }
     return {
       title: "Soil fertility index",
       items: [
-        { label: "High", color: "#22c55e" },
-        { label: "Medium", color: "#84cc16" },
-        { label: "Low", color: "#f59e0b" },
+        { label: "High", color: "#bbf7d0" },
+        { label: "Medium", color: "#fef08a" },
+        { label: "Low", color: "#fed7aa" },
       ],
     };
   }, [overlay]);
@@ -222,14 +229,17 @@ export function MapContainer({
         data: MAHARASHTRA_DISTRICTS_GEOJSON as unknown as GeoJSON.FeatureCollection,
       });
 
-      // India states - subtle transparent overlay
+      // India states - hidden by default, shows data when overlay is selected
       map.addLayer({
         id: LAYERS.statesFill,
         type: "fill",
         source: "india-states",
+        layout: {
+          visibility: "none",
+        },
         paint: {
-          "fill-color": "#ffffff",
-          "fill-opacity": 0.05,
+          "fill-color": rainfallColorExpression() as unknown as ExpressionSpecification,
+          "fill-opacity": 0.5,
         },
       });
 
@@ -237,10 +247,13 @@ export function MapContainer({
         id: LAYERS.statesOutline,
         type: "line",
         source: "india-states",
+        layout: {
+          visibility: "none",
+        },
         paint: {
-          "line-color": "#FFD700",
-          "line-width": 2.5,
-          "line-opacity": 0.9,
+          "line-color": "#d4af37",
+          "line-width": 2,
+          "line-opacity": 0.7,
         },
       });
 
@@ -263,16 +276,6 @@ export function MapContainer({
       });
 
       // Emphasize Maharashtra at India view
-      map.addLayer({
-        id: LAYERS.mhOutline,
-        type: "line",
-        source: "india-states",
-        filter: ["==", ["get", "name"], "Maharashtra"],
-        paint: {
-          "line-color": "rgba(52,211,153,0.95)",
-          "line-width": 3.2,
-        },
-      });
 
       // District layers (hidden until Maharashtra view)
       map.addLayer({
@@ -348,7 +351,6 @@ export function MapContainer({
         mapRef.current.setPaintProperty(LAYERS.statesOutline, "line-opacity", 0.15);
 
         // Bold Maharashtra outline for transition cue.
-        mapRef.current.setPaintProperty(LAYERS.mhOutline, "line-width", 5);
 
         // Reveal districts a moment later for "cinema" feel.
         window.setTimeout(() => {
@@ -475,6 +477,33 @@ export function MapContainer({
     );
   }, [overlay, viewMode]);
 
+  // Toggle states fill layer visibility and color based on overlay selection
+  useEffect(() => {
+    const m = mapRef.current;
+    if (!m) return;
+    if (!m.getLayer(LAYERS.statesFill)) return;
+      if (!m.getLayer(LAYERS.statesOutline)) return;
+    
+    if (overlay === "none") {
+      // Hide data layer and borders when no overlay is selected
+        m.setLayoutProperty(LAYERS.statesOutline, "visibility", "none");
+      m.setLayoutProperty(LAYERS.statesFill, "visibility", "none");
+    } else {
+      // Update color based on overlay mode
+      m.setPaintProperty(
+        LAYERS.statesFill,
+        "fill-color",
+        overlayExpression(overlay) as unknown as ExpressionSpecification,
+      );
+      
+      // Show both data layer and borders when overlay is active
+      if (viewMode === "india") {
+        m.setLayoutProperty(LAYERS.statesFill, "visibility", "visible");
+        m.setLayoutProperty(LAYERS.statesOutline, "visibility", "visible");
+      }
+    }
+  }, [overlay, viewMode]);
+
   return (
     <div className="relative h-full w-full">
       <div 
@@ -491,7 +520,7 @@ export function MapContainer({
           </div>
           <div className="mt-1 text-sm text-zinc-50">
             {viewMode === "india"
-              ? "Rainfall choropleth by state. Maharashtra is highlighted for deeper planning."
+              ? "Select an overlay above to visualize rainfall, soil fertility, or climate risk data across Indian states."
               : "District-level attributes drive overlays. Hover for details; click for decision panel."}
           </div>
 

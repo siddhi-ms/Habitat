@@ -6,7 +6,7 @@ import { LayerToggle, type OverlayMode } from "./LayerToggle";
 import { DistrictInfoPanel, type DistrictPanelData } from "./DistrictInfoPanel";
 
 export default function LivePage() {
-  const [overlay, setOverlay] = useState<OverlayMode>("fertility");
+  const [overlay, setOverlay] = useState<OverlayMode>("none");
   const [panel, setPanel] = useState<DistrictPanelData | null>(null);
 
   const headerSubtitle = useMemo(
