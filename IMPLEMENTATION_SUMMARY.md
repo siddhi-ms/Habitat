@@ -3,6 +3,7 @@
 ## ✅ COMPLETED FEATURES
 
 ### 1. **Search Functionality** ✓
+
 - **File**: `app/live/SearchBar.tsx`
 - Location database with Sindhudurg cities/talukas
 - Autocomplete with type-ahead
@@ -10,12 +11,14 @@
 - Visual distinction (district vs city icons)
 
 ### 2. **Sindhudurg Drilldown** ✓
+
 - **File**: `app/live/MapContainer.tsx`
 - Click Sindhudurg district → zoom to city level
 - Smooth camera transitions (1.6s duration, 30° pitch)
 - Automatic layer switching (districts → patches)
 
 ### 3. **Land Patch Grid System** ✓
+
 - **File**: `app/live/sindhudurgData.ts`
 - 100 patches (10x10 grid)
 - Realistic environmental data per patch:
@@ -27,6 +30,7 @@
   - Overall suitability (0-100)
 
 ### 4. **Environmental Layer Toggles** ✓
+
 - **Files**: `app/live/LayerToggle.tsx`, `app/live/MapContainer.tsx`
 - 5 layers: Rainfall, Temperature, Soil Fertility, Climate Risk, Suitability
 - Dynamic color expressions per layer
@@ -34,6 +38,7 @@
 - Real-time map updates on toggle
 
 ### 5. **Patch Info Panel** ✓
+
 - **File**: `app/live/PatchInfoPanel.tsx`
 - Detailed environmental metrics
 - Color-coded scores
@@ -42,6 +47,7 @@
 - Smooth slide-in animation
 
 ### 6. **Legend System** ✓
+
 - **File**: `app/live/MapContainer.tsx`
 - Context-aware legends per layer
 - Different scales for district vs patch view
@@ -49,6 +55,7 @@
 - Clear visual indicators
 
 ### 7. **Code Cleanup** ✓
+
 - **File**: `app/live/scoring.ts`
 - Removed tree species recommendation
 - Focus on land suitability analysis
@@ -134,17 +141,20 @@ Patch Detail Panel
 ## 🗺️ MAP LAYER STRUCTURE
 
 ### India View
+
 - States fill (overlay-based color)
 - States outline (gold)
 - State labels
 
 ### Maharashtra View
+
 - Districts fill (overlay-based color)
 - Districts outline (gold)
 - District labels
 - Districts hover highlight
 
 ### Sindhudurg View
+
 - Patches fill (environmental data color)
 - Patches outline (white, subtle)
 - Patches hover highlight (bold white)
@@ -154,19 +164,23 @@ Patch Detail Panel
 ## 🎯 INTERACTION PATTERNS
 
 ### Click Events
+
 - **India states** → Zoom to Maharashtra (if Maharashtra)
 - **Maharashtra districts** → Zoom to Sindhudurg (if Sindhudurg) OR open panel (other districts)
 - **Sindhudurg patches** → Open patch detail panel
 
 ### Hover Events
+
 - **States/Districts** → Show tooltip with summary
 - **Patches** → Show tooltip + highlight border
 
 ### Search Events
+
 - **Type location** → Show suggestions
 - **Click suggestion** → Zoom to location
 
 ### Overlay Events
+
 - **Toggle layer** → Update map colors instantly
 - **View mode** → Conditional layer visibility
 
@@ -175,6 +189,7 @@ Patch Detail Panel
 ## 🧮 DATA GENERATION LOGIC
 
 ### Patch Grid
+
 ```
 Bounds: lng [73.3, 73.9], lat [15.6, 16.5]
 Grid: 10×10 = 100 patches
@@ -182,6 +197,7 @@ Cell size: ~0.06° × ~0.09°
 ```
 
 ### Environmental Variables
+
 ```
 Rainfall = base + coastal_factor * range + random
 Temperature = base + inland_factor + random
@@ -194,6 +210,7 @@ Suitability = weighted(fertility, climate, rainfall)
 ```
 
 ### Coastal Gradient
+
 - Higher rainfall near coast (west)
 - Lower temperature near coast
 - Better soil nutrients near coast
@@ -203,21 +220,24 @@ Suitability = weighted(fertility, climate, rainfall)
 ## 📊 SCORING FORMULAS
 
 ### Fertility Score
+
 ```typescript
-fertility = (carbon / 3.5) * 50 + (nitrogen / 0.25) * 50
+fertility = (carbon / 3.5) * 50 + (nitrogen / 0.25) * 50;
 ```
 
 ### Climate Risk
+
 ```typescript
-climate_risk = drought_index * 0.6 + heat_stress * 0.4
+climate_risk = drought_index * 0.6 + heat_stress * 0.4;
 ```
 
 ### Suitability
+
 ```typescript
-suitability = 
+suitability =
   fertility * 0.4 +
   (100 - climate_risk) * 0.3 +
-  (rainfall_90d / 1400) * 100 * 0.3
+  (rainfall_90d / 1400) * 100 * 0.3;
 ```
 
 ---
@@ -225,28 +245,31 @@ suitability =
 ## 🎨 COLOR MAPPINGS
 
 ### Rainfall (90-day)
-| Range | Color | Hex |
-|-------|-------|-----|
-| < 600 | Yellow | #fef08a |
-| 600-900 | Green | #a7f3d0 |
-| 900-1200 | Teal | #6ee7b7 |
-| > 1200 | Deep Green | #34d399 |
+
+| Range    | Color      | Hex     |
+| -------- | ---------- | ------- |
+| < 600    | Yellow     | #fef08a |
+| 600-900  | Green      | #a7f3d0 |
+| 900-1200 | Teal       | #6ee7b7 |
+| > 1200   | Deep Green | #34d399 |
 
 ### Temperature
-| Range | Color | Hex |
-|-------|-------|-----|
-| < 24°C | Blue | #bae6fd |
-| 24-27°C | Green | #a7f3d0 |
+
+| Range   | Color  | Hex     |
+| ------- | ------ | ------- |
+| < 24°C  | Blue   | #bae6fd |
+| 24-27°C | Green  | #a7f3d0 |
 | 27-30°C | Yellow | #fef08a |
-| > 30°C | Red | #fecaca |
+| > 30°C  | Red    | #fecaca |
 
 ### Suitability
-| Range | Label | Color | Hex |
-|-------|-------|-------|-----|
-| 0-40 | Poor | Red | #fecaca |
-| 40-60 | Fair | Yellow | #fef08a |
-| 60-75 | Good | Green | #a7f3d0 |
-| 75-100 | Excellent | Teal | #6ee7b7 |
+
+| Range  | Label     | Color  | Hex     |
+| ------ | --------- | ------ | ------- |
+| 0-40   | Poor      | Red    | #fecaca |
+| 40-60  | Fair      | Yellow | #fef08a |
+| 60-75  | Good      | Green  | #a7f3d0 |
+| 75-100 | Excellent | Teal   | #6ee7b7 |
 
 ---
 
@@ -317,6 +340,7 @@ suitability =
 > "We've built a city-level land analysis tool for Sindhudurg, Maharashtra. [CLICK Maharashtra on map] Here are the districts. [HOVER over Sindhudurg] Notice the high rainfall and excellent fertility. [CLICK Sindhudurg] Now we zoom into 100 land patches. [TOGGLE to Temperature layer] Each patch shows environmental data. [HOVER a patch] See rainfall, temperature, soil metrics. [CLICK patch] Here's the full analysis: suitability score, fertility breakdown, climate risk. [POINT to summary] The system identifies which specific areas are viable for reforestation planning. No tree recommendations—just pure environmental analysis for informed decision-making."
 
 ### Demo Flow
+
 1. Start at Maharashtra view
 2. Highlight Sindhudurg hover
 3. Click → zoom transition

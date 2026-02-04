@@ -9,11 +9,13 @@ This project has been transformed into a **focused, city-level land analysis too
 ## 🗺️ Features
 
 ### 1. **Multi-Level Navigation**
+
 - **India View** → **Maharashtra Districts** → **Sindhudurg Land Patches**
 - Smooth, cinematic zoom transitions between levels
 - Clear visual hierarchy with contextual information panels
 
 ### 2. **Land Patch Grid System**
+
 - Sindhudurg divided into **100 land patches** (10x10 grid)
 - Each patch contains detailed environmental metrics:
   - **Rainfall** (30-day & 90-day aggregates)
@@ -23,7 +25,9 @@ This project has been transformed into a **focused, city-level land analysis too
   - **Suitability score** (0-100 for reforestation planning)
 
 ### 3. **Environmental Layer Toggles**
+
 Interactive visualization layers:
+
 - 🌧️ **Rainfall** - 90-day accumulation with adequacy indicators
 - 🌡️ **Temperature** - Average temperature with stress mapping
 - 🧪 **Soil Fertility** - Derived from carbon & nitrogen content
@@ -31,13 +35,17 @@ Interactive visualization layers:
 - ✓ **Suitability** - Overall land viability score
 
 ### 4. **Place Search**
+
 Search functionality for:
+
 - **Districts**: Sindhudurg, Ratnagiri, Kolhapur
 - **Cities/Talukas**: Kudal, Sawantwadi, Malwan, Vengurla, Devgad, Kankavli, Dodamarg, Vaibhavwadi
 - Auto-zoom to searched location
 
 ### 5. **Detailed Patch Analysis**
+
 Click any land patch to view:
+
 - Overall suitability score with color-coded rating
 - Rainfall metrics (30d & 90d)
 - Temperature & heat stress
@@ -50,6 +58,7 @@ Click any land patch to view:
 ## 🏗️ Architecture
 
 ### **Technology Stack**
+
 - **Frontend**: Next.js 14 (App Router), React, TypeScript
 - **Mapping**: MapLibre GL (open-source alternative to Mapbox)
 - **Styling**: Tailwind CSS
@@ -58,6 +67,7 @@ Click any land patch to view:
 ### **Key Components**
 
 #### `/app/live/`
+
 - **`MapContainer.tsx`** - Core map implementation with 3-tier view system
 - **`SearchBar.tsx`** - Location search with autocomplete
 - **`LayerToggle.tsx`** - Environmental layer selector
@@ -72,44 +82,49 @@ Click any land patch to view:
 ## 📊 Data Model
 
 ### **Land Patch Properties**
+
 ```typescript
 type LandPatch = {
-  id: string;                    // Unique identifier (SD-001 to SD-100)
-  center: [number, number];      // [longitude, latitude]
-  rainfall_30d: number;          // mm
-  rainfall_90d: number;          // mm
-  avg_temp: number;              // °C
-  soil_carbon: number;           // %
-  soil_nitrogen: number;         // %
-  soil_ph: number;               // pH value
-  drought_index: number;         // 0-100 (higher = more risk)
-  heat_stress: number;           // 0-100 (higher = more stress)
-  fertility_score: number;       // 0-100
-  climate_risk_score: number;    // 0-100
-  suitability_score: number;     // 0-100 (overall viability)
-}
+  id: string; // Unique identifier (SD-001 to SD-100)
+  center: [number, number]; // [longitude, latitude]
+  rainfall_30d: number; // mm
+  rainfall_90d: number; // mm
+  avg_temp: number; // °C
+  soil_carbon: number; // %
+  soil_nitrogen: number; // %
+  soil_ph: number; // pH value
+  drought_index: number; // 0-100 (higher = more risk)
+  heat_stress: number; // 0-100 (higher = more stress)
+  fertility_score: number; // 0-100
+  climate_risk_score: number; // 0-100
+  suitability_score: number; // 0-100 (overall viability)
+};
 ```
 
 ### **Environmental Calculation Logic**
 
 #### Rainfall Adequacy
+
 - Based on 90-day accumulation
 - Coastal areas receive higher rainfall (gradient effect)
 - Threshold-based adequacy scoring
 
 #### Soil Fertility
+
 ```
 fertility_score = (soil_carbon / 3.5) * 50 + (soil_nitrogen / 0.25) * 50
 ```
 
 #### Climate Risk
+
 ```
 climate_risk_score = (drought_index * 0.6) + (heat_stress * 0.4)
 ```
 
 #### Overall Suitability
+
 ```
-suitability_score = 
+suitability_score =
   fertility_score * 0.4 +
   (100 - climate_risk_score) * 0.3 +
   (rainfall_90d / 1400) * 100 * 0.3
@@ -149,30 +164,35 @@ suitability_score =
 ### **Color Scales** (Colorblind-Safe)
 
 #### Rainfall
+
 - < 600mm: `#fef08a` (yellow)
 - 600-900mm: `#a7f3d0` (green)
 - 900-1200mm: `#6ee7b7` (teal)
 - > 1200mm: `#34d399` (deep green)
 
 #### Temperature
+
 - < 24°C: `#bae6fd` (cool blue)
 - 24-27°C: `#a7f3d0` (comfortable green)
 - 27-30°C: `#fef08a` (warm yellow)
 - > 30°C: `#fecaca` (hot red)
 
 #### Soil Fertility
+
 - 0-40: `#fed7aa` (low - orange)
 - 40-65: `#fef08a` (medium - yellow)
 - 65-80: `#a7f3d0` (good - green)
 - 80-100: `#bbf7d0` (high - bright green)
 
 #### Climate Risk (Inverted Scale)
+
 - 0-25: `#a7f3d0` (low - green)
 - 25-50: `#fef08a` (moderate - yellow)
 - 50-70: `#fed7aa` (elevated - orange)
 - 70-100: `#fecaca` (high - red)
 
 ### **UI Themes**
+
 - Dark mode optimized for map viewing
 - Glass-morphism panels with backdrop blur
 - Smooth transitions and hover states
@@ -217,6 +237,7 @@ http://localhost:3000/live
 ## 🎯 Scope Decisions
 
 ### ✅ **Included**
+
 - Rainfall analysis (30d & 90d)
 - Climate risk indicators (drought, heat stress)
 - Soil fertility mapping
@@ -227,6 +248,7 @@ http://localhost:3000/live
 - Interactive environmental layers
 
 ### ❌ **Removed** (Per Mentor Guidance)
+
 - Tree species recommendation
 - Plant matching algorithms
 - Lifecycle simulation
@@ -237,24 +259,28 @@ http://localhost:3000/live
 ## 💡 Key Implementation Highlights
 
 ### **1. Grid Generation Algorithm**
+
 - Divides Sindhudurg into uniform 10x10 grid
 - Applies coastal gradient for rainfall
 - Elevation proxy for temperature variation
 - Realistic soil composition (laterite-based)
 
 ### **2. MapLibre Integration**
+
 - Three-source architecture (states, districts, patches)
 - Dynamic layer visibility based on view mode
 - Expression-based color mapping
 - Smooth camera transitions with easing
 
 ### **3. Interactive Layers**
+
 - Real-time color expression updates
 - Conditional rendering based on view mode
 - Hover effects with patch highlighting
 - Click handlers for drill-down navigation
 
 ### **4. Search Functionality**
+
 - Fuzzy string matching for location names
 - Type-ahead autocomplete
 - Click-outside-to-close behavior

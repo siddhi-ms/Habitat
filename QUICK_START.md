@@ -68,6 +68,7 @@ Then open: **http://localhost:3000/live**
 ## 📊 What to Look For
 
 ### **Visual Cues**
+
 - **Legend** (left panel) updates with each layer
 - **Patch colors** change smoothly on toggle
 - **Hover effects** highlight patch borders
@@ -75,12 +76,14 @@ Then open: **http://localhost:3000/live**
 - **Panel animations** slide in from right
 
 ### **Data Patterns**
+
 - **Coastal gradient**: Higher rainfall near west coast
 - **Temperature variation**: Cooler near coast, warmer inland
 - **Soil quality**: Better nutrients in coastal regions
 - **Climate risk**: Lower near coast (high rainfall protection)
 
 ### **Suitability Insights**
+
 - **75-100 (Excellent)**: High rainfall + good soil + low risk
 - **60-75 (Good)**: Balanced conditions
 - **40-60 (Fair)**: May need interventions
@@ -91,20 +94,24 @@ Then open: **http://localhost:3000/live**
 ## 🖱️ Interaction Patterns
 
 ### **Click Events**
+
 - **States** → Zoom to Maharashtra
 - **Districts** → Zoom to Sindhudurg (if Sindhudurg) OR open panel
 - **Patches** → Open detail panel
 
 ### **Hover Events**
+
 - **Any feature** → Show tooltip with summary
 - **Patches** → Highlight border + show stats
 
 ### **Search Events**
+
 - **Type 2+ characters** → Show suggestions
 - **Click suggestion** → Auto-zoom
 - **Click outside** → Close suggestions
 
 ### **Panel Events**
+
 - **Click X** → Close panel
 - **Click outside** → Close panel (districts only)
 
@@ -113,6 +120,7 @@ Then open: **http://localhost:3000/live**
 ## 🎯 Testing Checklist
 
 ### ✅ Basic Navigation
+
 - [ ] Map loads successfully
 - [ ] Maharashtra is visible
 - [ ] Clicking Maharashtra zooms in
@@ -121,6 +129,7 @@ Then open: **http://localhost:3000/live**
 - [ ] 100 patches are visible
 
 ### ✅ Layer System
+
 - [ ] Rainfall layer colors patches correctly
 - [ ] Temperature layer shows different gradient
 - [ ] Fertility layer updates colors
@@ -129,6 +138,7 @@ Then open: **http://localhost:3000/live**
 - [ ] Legend updates with each layer
 
 ### ✅ Search Functionality
+
 - [ ] Search bar is visible
 - [ ] Typing shows suggestions
 - [ ] Suggestions filter correctly
@@ -136,6 +146,7 @@ Then open: **http://localhost:3000/live**
 - [ ] Clicking outside closes suggestions
 
 ### ✅ Patch Interaction
+
 - [ ] Hovering patch shows tooltip
 - [ ] Tooltip displays correct data
 - [ ] Clicking patch opens panel
@@ -145,6 +156,7 @@ Then open: **http://localhost:3000/live**
 - [ ] Closing panel works
 
 ### ✅ Visual Quality
+
 - [ ] Smooth zoom transitions
 - [ ] No visual glitches
 - [ ] Colors are distinct
@@ -157,18 +169,21 @@ Then open: **http://localhost:3000/live**
 ## 🔍 Detailed Inspection
 
 ### **High-Quality Patches** (Look for green/teal in suitability view)
+
 - Usually found in **western coastal regions**
 - High rainfall (>1000mm/90d)
 - Good soil fertility (>70/100)
 - Low climate risk (<30/100)
 
 ### **Moderate Patches** (Yellow in suitability view)
+
 - Mid-region patches
 - Adequate rainfall (600-900mm/90d)
 - Medium fertility (50-70/100)
 - Moderate climate risk (30-50/100)
 
 ### **Challenging Patches** (Orange/red in suitability view)
+
 - Possibly inland areas
 - Lower rainfall (<600mm/90d)
 - Lower fertility (<50/100)
@@ -216,21 +231,25 @@ Analysis Summary:
 ## 🐛 Troubleshooting
 
 ### Map doesn't load
+
 - Check console for errors
 - Verify `npm run dev` is running
 - Clear browser cache
 
 ### Patches not visible
+
 - Ensure you've clicked Sindhudurg district
 - Check zoom level (should be ~10)
 - Verify map has loaded completely
 
 ### Search not working
+
 - Type at least 2 characters
 - Check spelling of location
 - Try different location names
 
 ### Colors not changing
+
 - Ensure layer is selected (highlighted button)
 - Wait for layer to fully render
 - Check if in correct view mode
