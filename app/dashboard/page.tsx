@@ -82,7 +82,7 @@ export default function DashboardPage() {
             <p className="text-slate-500 mt-2 font-medium">Monitoring {projects.length} active restoration sites.</p>
           </div>
           
-          <Link href="/dashboard/simulation">
+          <Link href="/newproject">
             <button className="bg-emerald-600 text-white px-8 py-4 rounded-2xl font-bold flex items-center gap-3 hover:bg-emerald-700 transition shadow-xl shadow-emerald-100">
               <Plus size={22} /> New Project
             </button>

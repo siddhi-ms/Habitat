@@ -38,7 +38,7 @@ export default function LandingPage() {
 
           {/* Main CTA Linked to Login */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link href="/app/login"> {/* 2. Wrap the button in a Link */}
+            <Link href="/live"> {/* 2. Wrap the button in a Link */}
               <button className="group flex items-center gap-3 bg-emerald-600 text-white px-8 py-4 rounded-xl text-lg font-bold hover:bg-emerald-500 transition-all shadow-xl shadow-emerald-900/20">
                 <Activity size={22} className="group-hover:scale-110 transition-transform" />
                 Live Dashboard
