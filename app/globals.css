@@ -22,17 +22,41 @@
 /* --- HEIGHT RESET & MAP FIXES --- */
 html, 
 body {
-  height: 100%; /* Critical for absolute positioned maps */
   margin: 0;
   padding: 0;
-  overflow: hidden; /* Prevents double scrollbars in a dashboard view */
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
 }
 
-/* Next.js App Router wrapper fix */
-main {
+/* Hide scrollbar for Chrome, Safari and Opera */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  display: none;
+}
+
+/* Map container pages need fixed height and no overflow */
+.map-container {
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* For map pages, body and html need 100% height */
+body:has(.map-container) {
+  height: 100%;
+  overflow: hidden;
+}
+
+body:has(.map-container) html {
+  height: 100%;
+}
+
+/* Next.js App Router wrapper - only full height for map pages */
+body:has(.map-container) main {
   height: 100%;
   width: 100%;
 }

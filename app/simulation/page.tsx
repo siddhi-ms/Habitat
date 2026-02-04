@@ -80,7 +80,8 @@ export default function SimulationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-900 via-emerald-950 to-zinc-900 text-zinc-50 p-8">
+    <div className="min-h-screen w-full bg-gradient-to-br from-zinc-900 via-emerald-950 to-zinc-900 text-zinc-50 p-8">
+      <div className="h-full overflow-y-auto pb-12">
       {/* Header */}
       <div className="max-w-7xl mx-auto mb-8">
         <div className="rounded-2xl border border-white/10 bg-black/30 px-6 py-4 backdrop-blur">
@@ -176,14 +177,14 @@ export default function SimulationPage() {
           maturityYears={maturityYears}
         />
 
-        {/* Timeline Slider */}
-        <div className="rounded-xl border border-white/10 bg-black/20 p-6 backdrop-blur">
-          <TimelineSlider
-            currentYear={currentYear}
-            maxYears={maturityYears}
-            onChange={setCurrentYear}
-          />
-        </div>
+        {/* Timeline Slider - FIXED */}
+      <div className="rounded-xl border border-white/10 bg-black/20 p-6 backdrop-blur">
+        <TimelineSlider
+          currentYear={currentYear}
+          maxYears={simulationYears} // <--- CHANGE THIS from 'maturityYears' to 'simulationYears'
+          onChange={setCurrentYear}
+        />
+      </div>
 
         {/* Metrics Panel */}
         {currentStage && (
@@ -258,6 +259,7 @@ export default function SimulationPage() {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

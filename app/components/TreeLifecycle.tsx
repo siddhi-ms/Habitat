@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import type { TreeSpecies } from '../data/parseTrees';
 import type { SoilWeatherSummary } from '../data/parseSoilWeather';
 import { calculateHealthScore } from '../utils/lifecycleUtils';
-import { TreeSVG } from './TreeSVG';
+import { ProceduralTree } from './ProceduralTree';
 
 interface TreeLifecycleProps {
   species: TreeSpecies;
@@ -26,11 +26,12 @@ export function TreeLifecycle({
 
   return (
     <div className="w-full h-[500px] rounded-2xl border border-white/10 bg-gradient-to-b from-sky-900/20 to-emerald-950/30 overflow-hidden relative">
-      <TreeSVG
+      <ProceduralTree
         speciesName={species.species_name}
         yearProgress={currentYear}
         maturityYears={maturityYears}
         healthScore={healthScore}
+        species={species}
       />
 
       {/* Location & conditions label */}

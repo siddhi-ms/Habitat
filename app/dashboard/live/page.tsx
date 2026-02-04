@@ -15,7 +15,7 @@ export default function LivePage() {
   );
 
   return (
-    <div className="h-dvh w-full bg-[#07120C] text-zinc-50">
+    <div className="h-dvh w-full bg-[#07120C] text-zinc-50 map-container">
       <div className="pointer-events-none absolute inset-x-0 top-0 z-20">
         <div className="mx-auto flex w-full max-w-[1400px] items-start justify-between gap-4 px-5 pt-5">
           <div className="pointer-events-auto rounded-2xl border border-white/10 bg-black/30 px-4 py-3 backdrop-blur">
