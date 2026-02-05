@@ -1,0 +1,123 @@
+{
+  "neem": {
+    "name": "Neem",
+    "video": "https://youtu.be/PeEsGFjmihE",
+    "phases": [
+      { "month": 1, "task": "Seed Treatment & Sowing", "details": "Sow in sandy loam; keep in partial shade to prevent seed desiccation." },
+      { "month": 3, "task": "Nursery Management", "details": "Monitor for root rot; ensure moderate watering and introduce morning sun." },
+      { "month": 6, "task": "Hardening Off", "details": "Gradually increase full sun exposure to stabilize the sapling's stem structure." },
+      { "month": 8, "task": "Biomass Support", "details": "Apply organic neem-cake fertilizer to boost natural pest resistance." },
+      { "month": 10, "task": "Root Strengthening", "details": "Reduce watering frequency to encourage deeper taproot penetration." },
+      { "month": 12, "task": "Stability Check", "details": "Sapling ready for permanent field transplant; ensure root ball is intact." }
+    ]
+  },
+  "peepal": {
+    "name": "Peepal",
+    "video": "https://youtu.be/RGMK1ACpVU4",
+    "phases": [
+      { "month": 1, "task": "Seedling Care", "details": "Extremely sensitive; avoid direct noon sun. Maintain soil pH around 6.5." },
+      { "month": 4, "task": "Moisture Regulation", "details": "High transpiration rate; maintain local humidity through regular misting." },
+      { "month": 6, "task": "Stem Lignification", "details": "Introduce balanced NPK to support the development of woody tissue." },
+      { "month": 8, "task": "Dormancy Preparation", "details": "Prepare for seasonal changes; reduce nitrogen to slow vertical growth." },
+      { "month": 10, "task": "Stress Hardening", "details": "Expose to varied light conditions to build resilience against open-ground heat." },
+      { "month": 12, "task": "Stability Check", "details": "Resilient root system established; ready for deployment to open ground." }
+    ]
+  },
+  "mango": {
+    "name": "Mango",
+    "video": "https://youtu.be/R2Fle2WnXKY",
+    "phases": [
+      { "month": 1, "task": "Grafting/Sowing", "details": "Use nutrient-dense silty soil; keep soil consistently moist but not soggy." },
+      { "month": 3, "task": "Foliage Monitoring", "details": "Check for anthracnose or leaf hoppers; ensure high air circulation." },
+      { "month": 6, "task": "Nutrient Loading", "details": "Increase organic compost intake to support rapid leaf canopy expansion." },
+      { "month": 9, "task": "Graft Union Check", "details": "Ensure the graft point is strong and healed; remove any rootstock suckers." },
+      { "month": 11, "task": "Acclimatization", "details": "Move to a less sheltered area to prepare for field wind and sun levels." },
+      { "month": 12, "task": "Stability Check", "details": "Check for taproot health and vigor before final field placement." }
+    ]
+  },
+  "teak": {
+    "name": "Teak",
+    "video": "https://youtu.be/EqVCTttSJz0",
+    "phases": [
+      { "month": 1, "task": "Hard Coat Treatment", "details": "Alternate 24h soaking/drying for 10 days to break seed dormancy." },
+      { "month": 4, "task": "Vertical Growth Focus", "details": "Provide high vertical light; ensure deep soil drainage to avoid waterlogging." },
+      { "month": 6, "task": "Pruning Side Buds", "details": "Remove lower side buds to encourage a straight, high-quality timber bole." },
+      { "month": 8, "task": "Stem Toughening", "details": "Reduce watering frequency to promote lignification of the main stem." },
+      { "month": 10, "task": "Mycorrhizal Boost", "details": "Introduce beneficial fungi to the soil to improve long-term nutrient uptake." },
+      { "month": 12, "task": "Stability Check", "details": "Check for root-bound signs; sapling is ready for forest deployment." }
+    ]
+  },
+  
+  "sal": {
+    "name": "Sal",
+    "video": "https://youtu.be/Rru2RwJs_VU",
+    "phases": [
+      { "month": 1, "task": "Immediate Sowing", "details": "Seeds lose viability in 1 week. Sow immediately in forest soil at shallow depth." },
+      { "month": 3, "task": "Taproot Development", "details": "Sal develops a long taproot early; use deep containers to avoid root coiling." },
+      { "month": 6, "task": "Shade Regulation", "details": "Maintain high lateral shade but ensure the leader shoot gets filtered top-light." },
+      { "month": 8, "task": "Mycorrhizal Inoculation", "details": "Introduce native Sal forest soil to establish essential symbiotic fungal networks." },
+      { "month": 10, "task": "Damping-off Prevention", "details": "Reduce misting frequency; ensure high air circulation to prevent fungal stem rot." },
+      { "month": 12, "task": "Stability Check", "details": "Height should be 30-45cm. Sapling is ready for permanent forest restoration site." }
+    ]
+  },
+  "arjun": {
+    "name": "Arjun",
+    "video": "https://youtu.be/JuL0WgcEFyE",
+    "phases": [
+      { "month": 1, "task": "Water Soaking", "details": "Soak seeds for 48h. Arjun prefers riparian (riverbank) silty-clay conditions." },
+      { "month": 4, "task": "Bark Formation", "details": "Monitor for early bark development; ensure high soil moisture levels are consistent." },
+      { "month": 6, "task": "Riparian Simulation", "details": "Increase watering to mimic riverbank saturation; provide high nitrogen organic feed." },
+      { "month": 8, "task": "Stem Lignification", "details": "Check for woody tissue strength; support the main leader shoot with a stake if needed." },
+      { "month": 10, "task": "Wetland Adaptation", "details": "Simulate periodic soil saturation to prepare the roots for riverbank deployment." },
+      { "month": 12, "task": "Stability Check", "details": "Stem should be woody and bark thick. Sapling is ready for water-body edges." }
+    ]
+  },
+  "amla": {
+    "name": "Amla",
+    "video": "https://youtu.be/e0kaNylJBRQ",
+    "phases": [
+      { "month": 1, "task": "Cold Stratification", "details": "Keep seeds in moist sand for 15 days at low temp before sowing in sun-lit beds." },
+      { "month": 3, "task": "Frost Protection", "details": "If altitude is high, protect young shoots from frost using mulch and covers." },
+      { "month": 6, "task": "Potash Application", "details": "Apply wood ash or potash to strengthen the sapling against future drought stress." },
+      { "month": 8, "task": "Pruning and Shaping", "details": "Remove weak lower branches to encourage a strong, upright central leader." },
+      { "month": 10, "task": "Hardening Off", "details": "Gradually reduce watering to build the plant's natural drought-resistance mechanisms." },
+      { "month": 12, "task": "Stability Check", "details": "Sapling is drought-resistant with a strong stem; ready for dryland planting." }
+    ]
+  },
+  "bamboo": {
+    "name": "Bamboo",
+    "video": "https://youtu.be/lZbyQN93uBM",
+    "phases": [
+      { "month": 1, "task": "Rhizome Initiation", "details": "High nitrogen soil required. Ensure 100% soil moisture and warm temperatures." },
+      { "month": 3, "task": "Culm Emergence", "details": "First culms appear; provide liquid seaweed fertilizer to boost rapid cell division." },
+      { "month": 6, "task": "Rhizome Expansion", "details": "Ensure the container is wide enough for rhizome spread; keep soil well-aerated." },
+      { "month": 8, "task": "Clump Management", "details": "Thin out overcrowded shoots to allow light to reach the center of the clump." },
+      { "month": 10, "task": "High-Growth Feed", "details": "Apply high-nitrogen mulch to support the late-season rapid growth spurt." },
+      { "month": 12, "task": "Stability Check", "details": "Bamboo grove formation has started. Rapid growth phase is now fully active." }
+    ]
+  },
+  "jamun": {
+    "name": "Jamun",
+    "video": "https://youtu.be/YpgQWWJgIsA",
+    "phases": [
+      { "month": 1, "task": "Fresh Sowing", "details": "Extract seeds from ripe fruit and sow within 2 days; seeds lose viability quickly." },
+      { "month": 4, "task": "Moisture Consistency", "details": "Maintain bog-like soil conditions; Jamun thrives in high-moisture environments." },
+      { "month": 6, "task": "Anthracnose Watch", "details": "Monitor leaves for dark spots; ensure foliage stays dry during evening hours." },
+      { "month": 8, "task": "Deep-Root Support", "details": "Ensure the planting medium is deep to allow for its extensive root system." },
+      { "month": 10, "task": "Cold Acclimatization", "details": "Reduce temperature slightly to harden the purple stem against winter lows." },
+      { "month": 12, "task": "Stability Check", "details": "Deep purple stem indicates optimal health. Sapling is ready for wetland planting." }
+    ]
+  },
+  "banyan": {
+    "name": "Banyan",
+    "video": "https://youtu.be/PeEsGFjmihE",
+    "phases": [
+      { "month": 1, "task": "Epiphytic Start", "details": "Use a porous medium like coco-peat; mist aerial roots twice daily for hydration." },
+      { "month": 4, "task": "Aerial Root Guidance", "details": "Direct emerging aerial roots toward the soil using guide straws or moist strings." },
+      { "month": 6, "task": "Host Simulation", "details": "Provide a sturdy central stake to simulate the host tree for the banyan to climb." },
+      { "month": 8, "task": "Lateral Expansion", "details": "Encourage wide branch growth; mist lateral branches to trigger more aerial roots." },
+      { "month": 10, "task": "Root Grounding", "details": "Ensure secondary prop-roots have successfully reached and entered the soil." },
+      { "month": 12, "task": "Stability Check", "details": "Secondary trunks are grounded and bark is firm. Survival probability is high." }
+    ]
+  }
+}

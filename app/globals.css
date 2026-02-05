@@ -1,3 +1,4 @@
+/* app/globals.css */
 @import "tailwindcss";
 
 :root {
@@ -5,41 +6,16 @@
   --foreground: #171717;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* ... the rest of your variables and theme ... */
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-/* --- HEIGHT RESET & MAP FIXES --- */
-html, 
-body {
-  height: 100%; /* Critical for absolute positioned maps */
-  margin: 0;
-  padding: 0;
-  overflow: hidden; /* Prevents double scrollbars in a dashboard view */
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-/* Next.js App Router wrapper fix */
-main {
-  height: 100%;
+/* Keep your custom overrides here though! */
+.leaflet-container {
   width: 100%;
+  height: 100%;
+  border-radius: 2rem;
 }
 
-/* Ensure MapLibre canvas is always visible */
-.maplibregl-canvas {
-  width: 100% !important;
-  height: 100% !important;
-  outline: none;
+html, body {
+  min-height: 100vh;
+  overflow-y: auto; /* Ensure you can scroll! */
 }

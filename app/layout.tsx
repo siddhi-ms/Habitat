@@ -1,23 +1,23 @@
-import "maplibre-gl/dist/maplibre-gl.css";
+// app/layout.tsx
+import "leaflet/dist/leaflet.css"; // <--- Add this here!
 import "./globals.css";
-import "maplibre-gl/dist/maplibre-gl.css";
 import { Inter } from 'next/font/google';
 
-const inter = Inter({ subsets: ["latin"], preload: false });
+const inter = Inter({ subsets: ["latin"] });
 
-export const metadata = {
-  title: 'TerraGuard AI | Intelligent Reforestation',
-  description: 'Moving from one-time planting to decadal ecosystem survival.',
-};
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+
+// app/layout.tsx
+export default function RootLayout({ children }) {
   return (
-    <html lang="en" className="scroll-smooth">
-      <body className={inter.className}>{children}</body>
+    <html lang="en">
+      <head>
+        <link 
+          rel="stylesheet" 
+          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+        />
+      </head>
+      <body className="antialiased">{children}</body>
     </html>
   );
 }

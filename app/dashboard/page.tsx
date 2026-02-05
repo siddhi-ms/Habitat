@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
-import { Plus, TreeDeciduous, MapPin, Loader2, LogOut, FolderOpen, Check, X, Send } from 'lucide-react';
+import { Plus, TreeDeciduous, MapPin, Loader2, LogOut, FolderOpen, Check, X, Send, ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -48,7 +48,6 @@ export default function DashboardPage() {
 
   const submitFeedback = async (isAccurate: boolean) => {
     if (isAccurate) {
-      // Logic to save positive feedback to Supabase if desired
       setFeedbackStatus('submitted');
     } else {
       setFeedbackStatus('negative');
@@ -56,7 +55,6 @@ export default function DashboardPage() {
   };
 
   const handleDetailedFeedback = async () => {
-    // Logic to save feedbackText to Supabase
     console.log("Feedback submitted:", feedbackText);
     setFeedbackStatus('submitted');
   };
@@ -103,24 +101,41 @@ export default function DashboardPage() {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {projects.map((project) => (
-              <div key={project.id} className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                <div className="flex justify-between items-start mb-6">
-                  <div className="bg-emerald-50 p-4 rounded-2xl text-emerald-600">
-                    <TreeDeciduous size={28} />
+              /* DYNAMIC ROUTE LINK ADDED HERE */
+              <Link key={project.id} href={`/project/${project.id}`}>
+                <div className="group bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full flex flex-col">
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="bg-emerald-50 p-4 rounded-2xl text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                      <TreeDeciduous size={28} />
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                        <span className="text-[10px] font-black tracking-widest px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full uppercase">
+                        {project.status || 'Active'}
+                        </span>
+                        <ArrowRight size={18} className="text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all" />
+                    </div>
                   </div>
-                  <span className="text-[10px] font-black tracking-widest px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full uppercase">
-                    {project.status}
-                  </span>
+                  
+                  <h3 className="text-2xl font-bold text-slate-900 mb-1">{project.name}</h3>
+                  
+                  {/* DISPLAY LAT/LNG SINCE 'LOCATION' TEXT MIGHT NOT EXIST */}
+                  <p className="text-slate-500 flex items-center gap-1.5 text-sm font-medium mb-8">
+                    <MapPin size={16} className="text-emerald-500" /> 
+                    {project.lat.toFixed(3)}, {project.lng.toFixed(3)}
+                  </p>
+
+                  <div className="mt-auto pt-6 border-t border-slate-50 flex justify-between items-center">
+                    <div className="flex flex-col">
+                        <span className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Species</span>
+                        <span className="text-slate-700 font-bold text-sm">{project.species}</span>
+                    </div>
+                    <div className="text-right">
+                        <span className="text-slate-400 text-[10px] font-bold uppercase tracking-widest block">Survival</span>
+                        <span className="text-emerald-600 font-black text-2xl">{project.survival_rate || '100%'}</span>
+                    </div>
+                  </div>
                 </div>
-                <h3 className="text-2xl font-bold text-slate-900 mb-1">{project.name}</h3>
-                <p className="text-slate-500 flex items-center gap-1.5 text-sm font-medium mb-8">
-                  <MapPin size={16} className="text-emerald-500" /> {project.location}
-                </p>
-                <div className="pt-6 border-t border-slate-50 flex justify-between items-center">
-                  <span className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Survival Probability</span>
-                  <span className="text-emerald-600 font-black text-2xl">{project.survival_rate}</span>
-                </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
