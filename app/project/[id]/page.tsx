@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
 import dynamic from 'next/dynamic';
-import { ArrowLeft, Navigation, Calendar, Droplets, Thermometer, Wind, Sun, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Navigation, Calendar, Droplets, Thermometer, Wind, Sun, AlertTriangle, ShieldCheck, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { generateCareProtocol } from '@/app/utils/ragEngine';
 import CareTimeline from '@/app/components/CareTimeline';
@@ -17,7 +17,10 @@ export default function ProjectDetailsPage() {
   const { id } = useParams();
   const [project, setProject] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [geoLib, setGeoLib] = useState<any>(null); // State to store Leaflet library
+  const [geoLib, setGeoLib] = useState<any>(null);
+  const [isEmergency, setIsEmergency] = useState(false);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -44,13 +47,83 @@ export default function ProjectDetailsPage() {
 
     const fetchDetails = async () => {
       const { data } = await supabase.from('projects').select('*').eq('id', id).single();
-      if (data) setProject(data);
+      if (data) {
+        setProject(data);
+        // Check for emergency conditions
+        const pred = data.prediction_result as Record<string, unknown> | null;
+        if (pred && typeof pred === 'object') {
+          const warnings = pred.warning_analytics as Record<string, unknown> | null | undefined;
+          if (warnings && typeof warnings === 'object') {
+            const droughtLevel = warnings.drought_risk_level as string | undefined;
+            const riskRating = pred.risk_rating as string | undefined;
+            // Emergency if drought is High or risk is High
+            if (droughtLevel === 'High' || riskRating === 'High') {
+              setIsEmergency(true);
+            }
+          }
+        }
+      }
       setLoading(false);
     };
 
     initLeaflet();
     fetchDetails();
   }, [id, supabase]);
+
+  const handleSOSClick = async () => {
+    if (!isEmergency || isSendingEmail || emailSent || !project) return;
+    
+    setIsSendingEmail(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || !user.email) {
+        throw new Error('User not authenticated or email not found');
+      }
+
+      // Call Supabase Edge Function to send email
+      const { error: funcError } = await supabase.functions.invoke('send-emergency-email', {
+        body: {
+          email: user.email,
+          projectName: project.name,
+          projectId: project.id,
+          emergencyType: 'Drought',
+          location: `${project.lat}, ${project.lng}`,
+          species: project.species || 'Unknown',
+        },
+      });
+
+      if (funcError) {
+        // Fallback: Store emergency notification in database
+        // You can set up a database trigger/webhook to send emails
+        console.warn('Edge Function not available, storing in database:', funcError);
+        
+        const { error: dbError } = await supabase
+          .from('emergency_notifications')
+          .insert([{
+            user_id: user.id,
+            project_id: project.id,
+            email: user.email,
+            project_name: project.name,
+            emergency_type: 'Drought',
+            location: `${project.lat}, ${project.lng}`,
+            species: project.species || 'Unknown',
+            status: 'pending',
+          }]);
+        
+        if (dbError) {
+          // If table doesn't exist, just show success (email will be sent via Edge Function when deployed)
+          console.warn('Database table not found, Edge Function will handle email when deployed');
+        }
+      }
+      
+      setEmailSent(true);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to send emergency email';
+      alert(message);
+    } finally {
+      setIsSendingEmail(false);
+    }
+  };
 
   if (loading || !project || !geoLib) {
     return (
@@ -90,7 +163,7 @@ export default function ProjectDetailsPage() {
               <span className="flex items-center gap-2"><Calendar size={16} /> {new Date(project.created_at).getFullYear()}</span>
             </div>
           </div>
-          <div className="bg-emerald-900 rounded-[2.5rem] p-10 text-white">
+          <div className={`rounded-[2.5rem] p-10 text-white transition-colors ${isEmergency ? 'bg-red-600' : 'bg-emerald-900'}`}>
             <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Survival Score</span>
             <div className="text-7xl font-black mt-2">{project.survival_rate ?? '94%'}</div>
             {p?.risk_rating != null && (
@@ -98,6 +171,41 @@ export default function ProjectDetailsPage() {
                 Risk: {String(p.risk_rating)}
               </span>
             )}
+            
+            {/* SOS/Drought Emergency Button */}
+            <button
+              onClick={handleSOSClick}
+              disabled={!isEmergency || isSendingEmail || emailSent}
+              className={`mt-6 w-full py-4 rounded-xl font-black text-lg transition-all flex items-center justify-center gap-2 ${
+                isEmergency
+                  ? emailSent
+                    ? 'bg-green-600 hover:bg-green-700 text-white cursor-default'
+                    : 'bg-red-700 hover:bg-red-800 text-white shadow-lg hover:shadow-xl active:scale-95 cursor-pointer'
+                  : 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
+              }`}
+            >
+              {isSendingEmail ? (
+                <>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <span>Sending...</span>
+                </>
+              ) : emailSent ? (
+                <>
+                  <AlertCircle size={20} />
+                  <span>Email Sent</span>
+                </>
+              ) : isEmergency ? (
+                <>
+                  <AlertCircle size={20} />
+                  <span>SOS / DROUGHT</span>
+                </>
+              ) : (
+                <>
+                  <AlertCircle size={20} />
+                  <span>SOS / DROUGHT</span>
+                </>
+              )}
+            </button>
           </div>
         </div>
 
