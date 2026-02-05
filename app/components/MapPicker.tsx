@@ -1,10 +1,12 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { createBrowserClient } from '@supabase/ssr'; // Added
-import { useRouter } from 'next/navigation'; // Added
+import { createBrowserClient } from '@supabase/ssr';
+import { useRouter } from 'next/navigation';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 const customIcon = new L.Icon({
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
@@ -19,7 +21,10 @@ export default function MapPicker() {
   const [coord, setCoord] = useState<{ lat: number; lng: number } | null>(null);
   const [altitude, setAltitude] = useState<string>("Not selected");
   const [tree, setTree] = useState("Neem");
-  const [isDeploying, setIsDeploying] = useState(false); // New loading state
+  const [isDeploying, setIsDeploying] = useState(false);
+  const [suggestedSaplings, setSuggestedSaplings] = useState<{ species: string; compatibility_score: number }[]>([]);
+  const [suggestedLocations, setSuggestedLocations] = useState<{ region: string; latitude: number; longitude: number; compatibility_score: number }[]>([]);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -29,48 +34,103 @@ export default function MapPicker() {
   const treeList = ["Neem", "Banyan", "Peepal", "Teak", "Sal", "Arjun", "Amla", "Bamboo", "Jamun", "Mango"];
 
   // Logic to save to Supabase
-// Inside MapPicker component...
+  const handleDeploy = async () => {
+    if (!projectName || !coord) return;
+    setIsDeploying(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Authentication required");
 
-const handleDeploy = async () => {
-  if (!projectName || !coord) return;
-  
-  setIsDeploying(true);
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error("Authentication required");
+      const res = await fetch(`${API_BASE}/predict`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          latitude: coord.lat,
+          longitude: coord.lng,
+          sapling_type: tree,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || res.statusText || "Prediction failed");
+      }
+      const predictionResult = await res.json();
 
-    // 1. Insert into Supabase
-    const { data, error } = await supabase
-      .from('projects')
-      .insert([{
-        name: projectName,
-        lat: coord.lat,
-        lng: coord.lng,
-        altitude: altitude,
-        species: tree,
-        user_id: user.id,
-        status: "Active",
-        survival_rate: "100%"
-      }])
-      .select(); // Added .select() to get the new project ID
+      const { data, error } = await supabase
+        .from("projects")
+        .insert([{
+          name: projectName,
+          lat: coord.lat,
+          lng: coord.lng,
+          altitude: altitude,
+          species: tree,
+          user_id: user.id,
+          status: "Active",
+          survival_rate: "100%",
+          prediction_result: predictionResult,
+        }])
+        .select();
 
-    if (error) throw error;
+      if (error) {
+        throw new Error(`Database error: ${error.message}`);
+      }
 
-    // 2. Navigate to the CARE PAGE
-    // We pass the tree, lat, and altitude in the URL
-    const params = new URLSearchParams({
-      species: tree.toLowerCase(),
-      lat: coord.lat.toString(),
-      alt: altitude.replace(/[^0-9]/g, '') // Send only the number
-    });
+      const projectId = data?.[0]?.id;
+      if (!projectId) throw new Error("No project ID returned");
+      router.push(`/project/${projectId}`);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Deployment failed";
+      alert(message);
+    } finally {
+      setIsDeploying(false);
+    }
+  };
 
-    router.push(`/newproject/care?${params.toString()}`);
-  } catch (err: any) {
-    alert(`Deployment failed: ${err.message}`);
-  } finally {
-    setIsDeploying(false);
-  }
-};
+  const fetchSuggestedSaplings = useCallback(async () => {
+    if (!coord) return;
+    setSuggestionsLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/suggestions/saplings`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ latitude: coord.lat, longitude: coord.lng }),
+      });
+      const data = await res.json();
+      setSuggestedSaplings(data.saplings || []);
+    } catch {
+      setSuggestedSaplings([]);
+    } finally {
+      setSuggestionsLoading(false);
+    }
+  }, [coord]);
+
+  const fetchSuggestedLocations = useCallback(async () => {
+    if (!tree) return;
+    setSuggestionsLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/suggestions/locations`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ species: tree }),
+      });
+      const data = await res.json();
+      setSuggestedLocations(data.locations || []);
+    } catch {
+      setSuggestedLocations([]);
+    } finally {
+      setSuggestionsLoading(false);
+    }
+  }, [tree]);
+
+  useEffect(() => {
+    if (coord) fetchSuggestedSaplings();
+    else setSuggestedSaplings([]);
+  }, [coord, fetchSuggestedSaplings]);
+
+  useEffect(() => {
+    if (tree) fetchSuggestedLocations();
+    else setSuggestedLocations([]);
+  }, [tree, fetchSuggestedLocations]);
 
   function LocationMarker() {
     useMapEvents({
@@ -110,7 +170,7 @@ const handleDeploy = async () => {
         <div className="space-y-5">
           <div className="space-y-2">
             <label className="text-sm font-bold text-gray-800">Project Name</label>
-            <input 
+            <input
               type="text"
               placeholder="e.g. Western Ghats Phase 1"
               value={projectName}
@@ -140,17 +200,51 @@ const handleDeploy = async () => {
 
           <div className="space-y-2">
             <label className="text-sm font-bold text-gray-800">Primary Sampling Species</label>
-            <select 
+            <select
               value={tree}
               onChange={(e) => setTree(e.target.value)}
               className="w-full p-3 bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-emerald-500 text-gray-900 outline-none appearance-none"
             >
               {treeList.map(t => <option key={t} value={t}>{t}</option>)}
             </select>
+            {suggestedSaplings.length > 0 && (
+              <div className="mt-2">
+                <span className="text-xs font-semibold text-emerald-700 uppercase tracking-wide">Suggested for this location</span>
+                <div className="mt-1.5 flex flex-wrap gap-2">
+                  {suggestedSaplings.slice(0, 5).map((s) => (
+                    <button
+                      key={s.species}
+                      type="button"
+                      onClick={() => setTree(s.species)}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${tree === s.species ? "bg-emerald-600 text-white shadow" : "bg-emerald-50 text-emerald-800 hover:bg-emerald-100"}`}
+                    >
+                      {s.species} ({s.compatibility_score}%)
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            {suggestionsLoading && suggestedSaplings.length === 0 && coord && (
+              <p className="text-xs text-gray-500 mt-1">Loading suggestions...</p>
+            )}
           </div>
+
+          {suggestedLocations.length > 0 && (
+            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+              <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Suggested regions for {tree}</span>
+              <ul className="mt-2 space-y-1 text-sm text-slate-700">
+                {suggestedLocations.slice(0, 5).map((loc) => (
+                  <li key={`${loc.region}-${loc.latitude}`} className="flex justify-between items-center">
+                    <span className="font-medium">{loc.region}</span>
+                    <span className="text-emerald-600 font-bold">{loc.compatibility_score}%</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
 
-        <button 
+        <button
           onClick={handleDeploy}
           disabled={!projectName || !coord || isDeploying}
           className="mt-auto w-full py-4 bg-[#00a86b] hover:bg-[#008f5a] disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-black text-lg rounded-xl shadow-[0_4px_14px_0_rgba(0,168,107,0.39)] transition-all active:scale-95"

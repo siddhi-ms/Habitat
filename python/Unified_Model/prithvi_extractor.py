@@ -24,7 +24,15 @@ class PrithviFeatureExtractor:
             device: Device to run model on ('cuda' or 'cpu'). Auto-detects if None.
         """
         self.model_name = model_name
-        self.device = device or torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        
+        # Check for environment variable to force CPU
+        force_cpu = os.getenv('HABITAT_FORCE_CPU', 'false').lower() == 'true'
+        if force_cpu:
+            print("Forcing Prithvi model to CPU (HABITAT_FORCE_CPU=true)")
+            self.device = torch.device("cpu")
+        else:
+            self.device = device or torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            
         self.model = None
         self._load_model()
     
@@ -78,21 +86,39 @@ class PrithviFeatureExtractor:
         image_tensor = image_tensor.to(self.device)
         
         # Extract features
-        with torch.no_grad():
-            features = self.model(image_tensor)
-            
-            # Handle different output formats
-            if isinstance(features, (list, tuple)):
-                # If multiple feature maps, use the last one or concatenate
-                features = features[-1]
-            
-            # Flatten features
-            features = features.view(features.size(0), -1)
-            
-            # Convert back to numpy
-            features_np = features.cpu().numpy().flatten()
-        
-        return features_np
+        try:
+            with torch.no_grad():
+                features = self.model(image_tensor)
+                
+                # Handle different output formats
+                if isinstance(features, (list, tuple)):
+                    # If multiple feature maps, use the last one or concatenate
+                    features = features[-1]
+                
+                # Flatten features
+                features = features.view(features.size(0), -1)
+                
+                # Convert back to numpy
+                features_np = features.cpu().numpy().flatten()
+            return features_np
+        except Exception as e:
+            if "CUDA" in str(e) and self.device.type == "cuda":
+                print(f"Warning: CUDA error during inference: {e}")
+                print("Falling back to CPU for this request...")
+                # Move model to CPU
+                self.device = torch.device("cpu")
+                self.model = self.model.to(self.device)
+                image_tensor = image_tensor.to(self.device)
+                
+                # Retry on CPU
+                with torch.no_grad():
+                    features = self.model(image_tensor)
+                    if isinstance(features, (list, tuple)):
+                        features = features[-1]
+                    features = features.view(features.size(0), -1)
+                    return features.cpu().numpy().flatten()
+            else:
+                raise e
     
     def extract_features_batch(self, image_arrays):
         """

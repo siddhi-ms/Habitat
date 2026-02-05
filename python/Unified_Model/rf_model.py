@@ -293,8 +293,9 @@ class RandomForestPredictor:
     
     def load_model(self, model_path, scaler_path=None):
         """Load a saved model and scaler."""
-        self.model = joblib.load(model_path)
-        print(f"✓ Model loaded from {model_path}")
+        # Use mmap_mode='r' to reduce memory usage during load
+        self.model = joblib.load(model_path, mmap_mode='r')
+        print(f"✓ Model loaded from {model_path} (mmap_mode='r')")
         
         if scaler_path and os.path.exists(scaler_path):
             self.scaler = joblib.load(scaler_path)
