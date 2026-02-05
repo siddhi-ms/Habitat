@@ -39,53 +39,53 @@ export function ProceduralTree({
     const params: any = {
       maxTrunkHeight: 1.4,
       maxTrunkRadius: 0.16,
-      canopyRadius: 0.8,
+      canopyRadius: 0.7,
       maxRootDepth: 0.8,
       maxRootSpread: 0.9,
       rootCount: 9,
-      canopyBlobCount: 18,
+      canopyBlobCount: 48, // High density: 40-50 blobs
     };
 
     if (speciesName === "Banyan") {
       params.maxTrunkHeight = 1.1;
       params.maxTrunkRadius = 0.2;
-      params.canopyRadius = 1.0;
+      params.canopyRadius = 0.85;
       params.maxRootDepth = 1.2;
       params.maxRootSpread = 1.3;
       params.rootCount = 12;
-      params.canopyBlobCount = 22;
+      params.canopyBlobCount = 52; // Higher for wider tree
     } else if (speciesName === "Neem") {
       params.maxTrunkHeight = 1.5;
       params.maxTrunkRadius = 0.13;
-      params.canopyRadius = 0.85;
+      params.canopyRadius = 0.75;
       params.maxRootDepth = 0.9;
       params.maxRootSpread = 1.0;
       params.rootCount = 10;
-      params.canopyBlobCount = 20;
+      params.canopyBlobCount = 50; // Tall, dense canopy
     } else if (speciesName === "Peepal") {
       params.maxTrunkHeight = 1.3;
       params.maxTrunkRadius = 0.14;
-      params.canopyRadius = 0.9;
+      params.canopyRadius = 0.8;
       params.maxRootDepth = 1.0;
       params.maxRootSpread = 0.95;
       params.rootCount = 8;
-      params.canopyBlobCount = 19;
+      params.canopyBlobCount = 48; // Rounded, full canopy
     } else if (speciesName === "Teak") {
       params.maxTrunkHeight = 1.6;
       params.maxTrunkRadius = 0.17;
-      params.canopyRadius = 0.75;
+      params.canopyRadius = 0.68;
       params.maxRootDepth = 1.1;
       params.maxRootSpread = 1.1;
       params.rootCount = 10;
-      params.canopyBlobCount = 17;
+      params.canopyBlobCount = 46; // Pyramidal shape, still dense
     } else if (speciesName === "Sal") {
       params.maxTrunkHeight = 1.2;
       params.maxTrunkRadius = 0.15;
-      params.canopyRadius = 0.7;
+      params.canopyRadius = 0.65;
       params.maxRootDepth = 0.75;
       params.maxRootSpread = 0.8;
       params.rootCount = 8;
-      params.canopyBlobCount = 16;
+      params.canopyBlobCount = 44; // Compact, dense
     }
 
     return params;
@@ -131,7 +131,7 @@ export function ProceduralTree({
           species={species}
         />
 
-        <OrbitControls enableZoom={false} autoRotate autoRotateSpeed={1.2} />
+        <OrbitControls enableZoom={false} autoRotate={false} />
       </Canvas>
 
       {/* Growth stage label */}
@@ -145,7 +145,88 @@ export function ProceduralTree({
 }
 
 /**
- * Main tree renderer component
+ * Sapling Geometry Component
+ * Young plant with thin stem and 2-4 large simple leaves
+ * Reference: Young plant sprout visualization
+ */
+function SaplingGeometry({
+  leafColor,
+  opacity,
+}: {
+  leafColor: string;
+  opacity: number;
+}) {
+  return (
+    <group>
+      {/* Thin green stem */}
+      <mesh position={[0, 0.3, 0]} castShadow>
+        <cylinderGeometry args={[0.04, 0.06, 0.6, 8]} />
+        <meshStandardMaterial
+          color="#4a7c2f"
+          roughness={0.7}
+          metalness={0}
+          transparent
+          opacity={opacity}
+        />
+      </mesh>
+
+      {/* Simple large leaves - 4 leaves arranged around stem */}
+      {[0, 1, 2, 3].map((i) => {
+        const angle = (i / 4) * Math.PI * 2;
+        const x = Math.cos(angle) * 0.15;
+        const z = Math.sin(angle) * 0.15;
+        const leafRotX = Math.PI / 3; // Angle leaves downward slightly
+
+        return (
+          <mesh
+            key={`sapling-leaf-${i}`}
+            position={[x, 0.55, z]}
+            rotation={[leafRotX, angle, 0]}
+            castShadow
+          >
+            {/* Ellipsoid leaf shape */}
+            <sphereGeometry args={[0.12, 12, 10]} />
+            <meshStandardMaterial
+              color={leafColor}
+              roughness={0.65}
+              metalness={0}
+              transparent
+              opacity={opacity * 0.95}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+        );
+      })}
+
+      {/* Small roots at base */}
+      {[0, 1, 2].map((i) => {
+        const angle = (i / 3) * Math.PI * 2;
+        const x = Math.cos(angle) * 0.08;
+        const z = Math.sin(angle) * 0.08;
+
+        return (
+          <mesh
+            key={`sapling-root-${i}`}
+            position={[x, 0.05, z]}
+            rotation={[Math.PI / 4, angle, 0]}
+          >
+            <cylinderGeometry args={[0.02, 0.03, 0.1, 6]} />
+            <meshStandardMaterial
+              color="#6b4423"
+              roughness={0.8}
+              metalness={0}
+              transparent
+              opacity={opacity * 0.7}
+            />
+          </mesh>
+        );
+      })}
+    </group>
+  );
+}
+
+/**
+ * Main tree renderer component with sapling morphing logic
  */
 function TreeRenderer({
   growthProgress,
@@ -160,43 +241,68 @@ function TreeRenderer({
   trunkColor: string;
   species: TreeSpecies;
 }) {
+  // Morphing logic: 0-15% sapling, 15-25% crossover, 25%+ main tree
+  const saplingPhase = growthProgress < 0.15;
+  const crossoverPhase = growthProgress >= 0.15 && growthProgress < 0.25;
+  const mainTreePhase = growthProgress >= 0.25;
+
+  // Sapling scales from 0 to 1 during 0-15%
+  const saplingScale = saplingPhase ? (growthProgress / 0.15) : (1 - (growthProgress - 0.15) / 0.1);
+  const saplingOpacity = Math.max(0, Math.min(1, saplingScale));
+
+  // Main tree scales in during 15-25%
+  const mainTreeScale = mainTreePhase ? 1 : Math.max(0, (growthProgress - 0.15) / 0.1);
+  const mainTreeOpacity = Math.min(1, (growthProgress - 0.15) / 0.1);
+
   return (
     <group position={[0, 0, 0]}>
-      {/* Root system */}
-      <ProceduralRootSystem
-        growthProgress={growthProgress}
-        rootCount={params.rootCount}
-        maxDepth={params.maxRootDepth}
-        maxSpread={params.maxRootSpread}
-      />
-
-      {/* Trunk */}
-      <ProceduralTrunk
-        growthProgress={growthProgress}
-        maxHeight={params.maxTrunkHeight}
-        maxRadius={params.maxTrunkRadius}
-        color={trunkColor}
-      />
-
-      {/* Branches */}
-      {growthProgress > 0.15 && (
-        <ProceduralBranches
-          growthProgress={growthProgress}
-          trunkHeight={params.maxTrunkHeight * growthProgress}
-          maxRadius={params.maxTrunkRadius}
-          color={trunkColor}
-        />
+      {/* Sapling phase (0-25%) */}
+      {growthProgress < 0.25 && (
+        <group scale={saplingScale} position={[0, 0, 0]}>
+          <SaplingGeometry leafColor={leafColor} opacity={saplingOpacity} />
+        </group>
       )}
 
-      {/* Canopy cloud */}
-      {growthProgress > 0.2 && (
-        <CanopyCluster
-          growthProgress={growthProgress}
-          centerY={params.maxTrunkHeight * growthProgress + 0.1}
-          canopyRadius={params.canopyRadius}
-          blobCount={params.canopyBlobCount}
-          leafColor={leafColor}
-        />
+      {/* Main tree phase (15%+) */}
+      {growthProgress >= 0.15 && (
+        <group scale={mainTreeScale} position={[0, 0, 0]}>
+          {/* Root system */}
+          <ProceduralRootSystem
+            growthProgress={mainTreeScale}
+            rootCount={params.rootCount}
+            maxDepth={params.maxRootDepth}
+            maxSpread={params.maxRootSpread}
+          />
+
+          {/* Trunk */}
+          <ProceduralTrunk
+            growthProgress={mainTreeScale}
+            maxHeight={params.maxTrunkHeight}
+            maxRadius={params.maxTrunkRadius}
+            color={trunkColor}
+          />
+
+          {/* Branches */}
+          {mainTreeScale > 0.15 && (
+            <ProceduralBranches
+              growthProgress={mainTreeScale}
+              trunkHeight={params.maxTrunkHeight * mainTreeScale}
+              maxRadius={params.maxTrunkRadius}
+              color={trunkColor}
+            />
+          )}
+
+          {/* Canopy cloud - high density */}
+          {mainTreeScale > 0.2 && (
+            <CanopyCluster
+              growthProgress={mainTreeScale}
+              centerY={params.maxTrunkHeight * mainTreeScale + 0.1}
+              canopyRadius={params.canopyRadius}
+              blobCount={params.canopyBlobCount}
+              leafColor={leafColor}
+            />
+          )}
+        </group>
       )}
     </group>
   );
@@ -457,8 +563,8 @@ function ProceduralBranches({
 }
 
 /**
- * Canopy Cluster - Cloud of leaf blobs
- * Individual icosahedrons that scale up with staggered animation
+ * Canopy Cluster - Dense cloud of leaf blobs with tight clustering
+ * 40-50 icosahedrons with scale variation for a full, lush appearance
  */
 function CanopyCluster({
   growthProgress,
@@ -480,19 +586,41 @@ function CanopyCluster({
       delay: number;
     }[] = [];
 
-    // Golden sphere distribution
+    // Golden sphere distribution - tighter clustering for density
     for (let i = 0; i < blobCount; i++) {
       const phi = Math.acos(-1 + (2 * i) / blobCount);
       const theta = Math.sqrt(Math.PI * blobCount) * phi;
 
-      // Add noise to positions
-      const noise = 0.15 + Math.random() * 0.1;
+      // Tighter spread: reduce noise variance and use smaller radius multiplier
+      const noise = 0.7 + Math.random() * 0.25; // 0.7-0.95 instead of 0.15-0.25
       const x = Math.cos(theta) * Math.sin(phi) * canopyRadius * noise;
       const y = Math.cos(phi) * canopyRadius * 0.6 * noise;
       const z = Math.sin(theta) * Math.sin(phi) * canopyRadius * noise;
 
-      const size = 0.2 + Math.random() * 0.12;
+      // Scale variation: 0.5 to 1.2 to fill gaps and create visual density
+      const size = 0.15 + Math.random() * 0.2; // 0.15-0.35 range
       const delay = (i / blobCount) * 0.3; // Stagger animation
+
+      blobList.push({
+        position: [x, centerY + y, z],
+        size,
+        delay,
+      });
+    }
+
+    // Add extra small blobs in gaps for even denser appearance
+    const extraBlobCount = Math.floor(blobCount * 0.3);
+    for (let i = 0; i < extraBlobCount; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const elevation = Math.random() * Math.PI;
+      const radius = canopyRadius * (0.5 + Math.random() * 0.4);
+
+      const x = Math.cos(angle) * Math.sin(elevation) * radius;
+      const y = Math.cos(elevation) * radius * 0.5;
+      const z = Math.sin(angle) * Math.sin(elevation) * radius;
+
+      const size = 0.08 + Math.random() * 0.12; // Smaller filler blobs
+      const delay = Math.random() * 0.3;
 
       blobList.push({
         position: [x, centerY + y, z],
