@@ -4,13 +4,16 @@ Combines Sentinel-2, Prithvi, and Random Forest models.
 """
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 import pandas as pd
 import numpy as np
 import os
 import sys
+import re
+import json
 
 # Add Unified_Model to path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'Unified_Model'))
@@ -27,6 +30,14 @@ app = FastAPI(
     version="1.0.0"
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Global model instances (loaded on startup)
 sentinel_fetcher = None
 prithvi_extractor = None
@@ -37,6 +48,10 @@ trees_df = None
 target_scale_params = None
 texture_encoding = None
 RESULT_JSON_PATH = None  # set on startup
+# Suggestion model data (region -> saplings, species -> regions)
+best_saplings_for_regions = None
+best_regions_for_saplings = None
+regions_lat_lon = None  # list of (region_key, lat, lon) for nearest-neighbor
 
 
 class PredictionRequest(BaseModel):
@@ -84,6 +99,17 @@ class PredictionResponse(BaseModel):
     
     # Model metadata
     model_info: dict
+
+
+class SuggestSaplingsRequest(BaseModel):
+    """Request for sapling suggestions given a location."""
+    latitude: float = Field(..., ge=-90, le=90)
+    longitude: float = Field(..., ge=-180, le=180)
+
+
+class SuggestLocationsRequest(BaseModel):
+    """Request for location suggestions given a species."""
+    species: str = Field(..., min_length=1)
 
 
 def load_decode_params():
@@ -201,6 +227,33 @@ def calculate_risk_rating(predictions, tree_species_data):
         return "High"
 
 
+def load_suggestion_data():
+    """Load suggestion JSON files and build region index for nearest-neighbor."""
+    global best_saplings_for_regions, best_regions_for_saplings, regions_lat_lon
+    base = os.path.join(os.path.dirname(__file__), "suggestionModel")
+    path_saplings = os.path.join(base, "best_saplings_for_regions.json")
+    path_regions = os.path.join(base, "best_regions_for_saplings.json")
+    if not os.path.exists(path_saplings) or not os.path.exists(path_regions):
+        print("Warning: Suggestion JSON files not found. Suggestion endpoints will return empty.")
+        best_saplings_for_regions = {}
+        best_regions_for_saplings = {}
+        regions_lat_lon = []
+        return
+    with open(path_saplings, "r") as f:
+        best_saplings_for_regions = json.load(f)
+    with open(path_regions, "r") as f:
+        best_regions_for_saplings = json.load(f)
+    # Parse "City (lat, lon)" -> (region_key, lat, lon)
+    pattern = re.compile(r"^.+ \(([-\d.]+),\s*([-\d.]+)\)$")
+    regions_lat_lon = []
+    for key in best_saplings_for_regions:
+        m = pattern.match(key)
+        if m:
+            lat, lon = float(m.group(1)), float(m.group(2))
+            regions_lat_lon.append((key, lat, lon))
+    print(f"[OK] Loaded suggestions: {len(best_saplings_for_regions)} regions, {len(best_regions_for_saplings)} species")
+
+
 @app.on_event("startup")
 async def startup_event():
     """Initialize models on startup."""
@@ -237,7 +290,11 @@ async def startup_event():
     
     # Try to load existing model, otherwise train a new one
     if os.path.exists(model_path) and os.path.exists(scaler_path):
-        rf_predictor.load_model(model_path, scaler_path)
+        try:
+            rf_predictor.load_model(model_path, scaler_path)
+        except Exception as e:
+            print(f"Error loading RF model: {e}")
+            print("Attempting to continue without a pre-loaded model...")
     else:
         print("No saved model found. Training new model...")
         final_processed_path = os.path.join(os.path.dirname(__file__), 'data', 'finalProcessed.csv')
@@ -257,6 +314,9 @@ async def startup_event():
     print("Loading Weather Health Model...")
     health_model = WeatherHealthModel()
     
+    # Load suggestion data for location/species suggestions
+    load_suggestion_data()
+    
     print("✓ All models initialized successfully")
 
 
@@ -268,6 +328,9 @@ async def root():
         "version": "1.0.0",
         "endpoints": {
             "/predict": "POST - Get predictions for latitude/longitude",
+            "/warnings": "POST - Get warning analytics only (drought, health, weather)",
+            "/suggestions/saplings": "POST - Suggest saplings for a location",
+            "/suggestions/locations": "POST - Suggest locations for a species",
             "/health": "GET - Health check",
             "/docs": "GET - API documentation"
         }
@@ -328,12 +391,17 @@ async def predict(request: PredictionRequest):
         
         # Step 2: Extract features using Prithvi
         print("Extracting features using Prithvi model...")
-        if prithvi_extractor:
-            prithvi_features = prithvi_extractor.extract_features(satellite_image)
-        else:
-            # Use mock features if Prithvi not available
+        try:
+            if prithvi_extractor:
+                prithvi_features = prithvi_extractor.extract_features(satellite_image)
+            else:
+                raise ValueError("Prithvi extractor not initialized")
+        except Exception as e:
+            print(f"Warning: Prithvi feature extraction failed: {e}")
+            print("Using mock Prithvi features as fallback...")
+            # Use random noise of dimension 100 as fallback
             prithvi_features = np.random.rand(100).astype(np.float32)
-            print("Using mock Prithvi features")
+            print("✓ Generated mock Prithvi features")
         
         # Step 3: Predict using Random Forest
         print("Predicting features using Random Forest...")
@@ -428,6 +496,64 @@ async def predict(request: PredictionRequest):
         raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
 
 
+@app.post("/suggestions/saplings")
+async def suggest_saplings(request: SuggestSaplingsRequest):
+    """
+    Suggest best sapling species for a given location (lat/lng).
+    Uses precomputed ML suggestions; finds nearest region and returns top species.
+    """
+    if not regions_lat_lon or not best_saplings_for_regions:
+        return {"saplings": [], "message": "Suggestion data not loaded."}
+    lat, lon = request.latitude, request.longitude
+    best_key = None
+    best_dist = float("inf")
+    for region_key, rlat, rlon in regions_lat_lon:
+        dist = (lat - rlat) ** 2 + (lon - rlon) ** 2
+        if dist < best_dist:
+            best_dist = dist
+            best_key = region_key
+    if best_key is None:
+        return {"saplings": []}
+    saplings = best_saplings_for_regions.get(best_key, [])
+    return {"region": best_key, "saplings": saplings}
+
+
+@app.post("/suggestions/locations")
+async def suggest_locations(request: SuggestLocationsRequest):
+    """
+    Suggest best locations (regions) for a given species.
+    Returns top regions with compatibility scores.
+    """
+    if not best_regions_for_saplings:
+        return {"locations": [], "message": "Suggestion data not loaded."}
+    species = request.species.strip()
+    # Try exact match first, then capitalize
+    if species not in best_regions_for_saplings:
+        species_cap = species.capitalize()
+        if species_cap in best_regions_for_saplings:
+            species = species_cap
+        else:
+            return {"locations": [], "message": f"Species '{request.species}' not found."}
+    locations = best_regions_for_saplings.get(species, [])
+    return {"species": species, "locations": locations}
+
+
+@app.post("/warnings")
+async def get_warnings(request: PredictionRequest):
+    """
+    Run the full prediction pipeline and return only warning analytics
+    (drought risk, health risk, weather alerts). Use when you need to
+    trigger the warning model without displaying full prediction data.
+    """
+    try:
+        response = await predict(request)
+        return {"warning_analytics": response.warning_analytics}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Warning analysis failed: {str(e)}")
+
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, port=8000)
