@@ -65,7 +65,7 @@ body:has(.map-container) main {
 /* Keep your custom overrides here though! */
 .leaflet-container {
   width: 100%;
-
+}
 html, body {
   min-height: 100vh;
   overflow-y: auto; /* Ensure you can scroll! */
