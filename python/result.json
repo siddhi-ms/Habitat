@@ -1,0 +1,50 @@
+{
+  "latitude": 18.0,
+  "longitude": 74.0,
+  "sapling_type": "Mango",
+  "prediction_date": "2026-02-05",
+  "rainfall_weekly": -43.2667,
+  "rainfall_30d": -432.162,
+  "rainfall_90d": -721.7266,
+  "temp_mean": 41.5097,
+  "temp_max": 49.2432,
+  "temp_min": 26.1476,
+  "humidity_mean": 35.9263,
+  "wind_speed": 16.7333,
+  "solar_radiation": 34.3269,
+  "et0": 8.1754,
+  "pH": 13.8734,
+  "Org_Carbon_pct": 1.3701,
+  "Nitrogen_pct": 0.084,
+  "Depth_cm": 15.0,
+  "Texture_Code_encoded": 3,
+  "Texture_Code": "SCL",
+  "Sample_ID": "S_1800_7400",
+  "Soil_Collection_Date": "2026-02-05",
+  "risk_rating": "High",
+  "warning_analytics": {
+    "drought_risk_level": "High",
+    "drought_probability_pct": 95.0,
+    "lead_time_weeks": 3,
+    "warning_message": "CRITICAL: High drought probability detected for the 3-week window. Implement water saving measures immediately.",
+    "critical_factors": [
+      "Low cumulative rainfall",
+      "High surface temperature",
+      "High evapotranspiration rate"
+    ],
+    "health_risk": {
+      "heat_index_celsius": 45.56,
+      "health_risk_level": "Danger",
+      "health_advice": "HIGH RISK: Heatstroke, heat cramps, or heat exhaustion likely. Limit outdoor exposure."
+    },
+    "weather_alerts": [
+      "Heatwave Warning: Extreme temperatures may damage crops.",
+      "High Diurnal Variation: High temperature fluctuations can stress young plants."
+    ]
+  },
+  "model_info": {
+    "sentinel2_used": true,
+    "prithvi_used": true,
+    "rf_model_loaded": true
+  }
+}

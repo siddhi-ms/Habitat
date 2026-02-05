@@ -1,0 +1,322 @@
+{
+  "Neem": [
+    {
+      "region": "Akola",
+      "latitude": 20.7002,
+      "longitude": 77.0082,
+      "compatibility_score": 33.01
+    },
+    {
+      "region": "Chandrapur",
+      "latitude": 19.9615,
+      "longitude": 79.2961,
+      "compatibility_score": 32.41
+    },
+    {
+      "region": "Amravati",
+      "latitude": 20.932,
+      "longitude": 77.7523,
+      "compatibility_score": 32.08
+    },
+    {
+      "region": "Wardha",
+      "latitude": 20.7453,
+      "longitude": 78.6022,
+      "compatibility_score": 27.76
+    },
+    {
+      "region": "Jalna",
+      "latitude": 19.8297,
+      "longitude": 75.88,
+      "compatibility_score": 27.47
+    }
+  ],
+  "Banyan": [
+    {
+      "region": "Akola",
+      "latitude": 20.7002,
+      "longitude": 77.0082,
+      "compatibility_score": 32.98
+    },
+    {
+      "region": "Chandrapur",
+      "latitude": 19.9615,
+      "longitude": 79.2961,
+      "compatibility_score": 32.7
+    },
+    {
+      "region": "Amravati",
+      "latitude": 20.932,
+      "longitude": 77.7523,
+      "compatibility_score": 32.46
+    },
+    {
+      "region": "Wardha",
+      "latitude": 20.7453,
+      "longitude": 78.6022,
+      "compatibility_score": 27.59
+    },
+    {
+      "region": "Osmanabad",
+      "latitude": 18.1853,
+      "longitude": 76.042,
+      "compatibility_score": 26.92
+    }
+  ],
+  "Peepal": [
+    {
+      "region": "Akola",
+      "latitude": 20.7002,
+      "longitude": 77.0082,
+      "compatibility_score": 33.93
+    },
+    {
+      "region": "Chandrapur",
+      "latitude": 19.9615,
+      "longitude": 79.2961,
+      "compatibility_score": 33.73
+    },
+    {
+      "region": "Amravati",
+      "latitude": 20.932,
+      "longitude": 77.7523,
+      "compatibility_score": 33.44
+    },
+    {
+      "region": "Wardha",
+      "latitude": 20.7453,
+      "longitude": 78.6022,
+      "compatibility_score": 28.4
+    },
+    {
+      "region": "Osmanabad",
+      "latitude": 18.1853,
+      "longitude": 76.042,
+      "compatibility_score": 27.66
+    }
+  ],
+  "Teak": [
+    {
+      "region": "Akola",
+      "latitude": 20.7002,
+      "longitude": 77.0082,
+      "compatibility_score": 39.94
+    },
+    {
+      "region": "Chandrapur",
+      "latitude": 19.9615,
+      "longitude": 79.2961,
+      "compatibility_score": 38.73
+    },
+    {
+      "region": "Amravati",
+      "latitude": 20.932,
+      "longitude": 77.7523,
+      "compatibility_score": 38.39
+    },
+    {
+      "region": "Wardha",
+      "latitude": 20.7453,
+      "longitude": 78.6022,
+      "compatibility_score": 32.75
+    },
+    {
+      "region": "Osmanabad",
+      "latitude": 18.1853,
+      "longitude": 76.042,
+      "compatibility_score": 32.73
+    }
+  ],
+  "Sal": [
+    {
+      "region": "Akola",
+      "latitude": 20.7002,
+      "longitude": 77.0082,
+      "compatibility_score": 32.8
+    },
+    {
+      "region": "Chandrapur",
+      "latitude": 19.9615,
+      "longitude": 79.2961,
+      "compatibility_score": 32.11
+    },
+    {
+      "region": "Amravati",
+      "latitude": 20.932,
+      "longitude": 77.7523,
+      "compatibility_score": 31.86
+    },
+    {
+      "region": "Wardha",
+      "latitude": 20.7453,
+      "longitude": 78.6022,
+      "compatibility_score": 27.2
+    },
+    {
+      "region": "Osmanabad",
+      "latitude": 18.1853,
+      "longitude": 76.042,
+      "compatibility_score": 26.89
+    }
+  ],
+  "Arjun": [
+    {
+      "region": "Akola",
+      "latitude": 20.7002,
+      "longitude": 77.0082,
+      "compatibility_score": 30.46
+    },
+    {
+      "region": "Chandrapur",
+      "latitude": 19.9615,
+      "longitude": 79.2961,
+      "compatibility_score": 30.11
+    },
+    {
+      "region": "Amravati",
+      "latitude": 20.932,
+      "longitude": 77.7523,
+      "compatibility_score": 29.94
+    },
+    {
+      "region": "Wardha",
+      "latitude": 20.7453,
+      "longitude": 78.6022,
+      "compatibility_score": 25.5
+    },
+    {
+      "region": "Osmanabad",
+      "latitude": 18.1853,
+      "longitude": 76.042,
+      "compatibility_score": 24.83
+    }
+  ],
+  "Amla": [
+    {
+      "region": "Akola",
+      "latitude": 20.7002,
+      "longitude": 77.0082,
+      "compatibility_score": 39.69
+    },
+    {
+      "region": "Chandrapur",
+      "latitude": 19.9615,
+      "longitude": 79.2961,
+      "compatibility_score": 38.55
+    },
+    {
+      "region": "Amravati",
+      "latitude": 20.932,
+      "longitude": 77.7523,
+      "compatibility_score": 38.18
+    },
+    {
+      "region": "Wardha",
+      "latitude": 20.7453,
+      "longitude": 78.6022,
+      "compatibility_score": 32.51
+    },
+    {
+      "region": "Osmanabad",
+      "latitude": 18.1853,
+      "longitude": 76.042,
+      "compatibility_score": 32.42
+    }
+  ],
+  "Bamboo": [
+    {
+      "region": "Akola",
+      "latitude": 20.7002,
+      "longitude": 77.0082,
+      "compatibility_score": 26.79
+    },
+    {
+      "region": "Chandrapur",
+      "latitude": 19.9615,
+      "longitude": 79.2961,
+      "compatibility_score": 26.11
+    },
+    {
+      "region": "Amravati",
+      "latitude": 20.932,
+      "longitude": 77.7523,
+      "compatibility_score": 26.01
+    },
+    {
+      "region": "Wardha",
+      "latitude": 20.7453,
+      "longitude": 78.6022,
+      "compatibility_score": 22.37
+    },
+    {
+      "region": "Jalna",
+      "latitude": 19.8297,
+      "longitude": 75.88,
+      "compatibility_score": 22.05
+    }
+  ],
+  "Jamun": [
+    {
+      "region": "Akola",
+      "latitude": 20.7002,
+      "longitude": 77.0082,
+      "compatibility_score": 32.54
+    },
+    {
+      "region": "Chandrapur",
+      "latitude": 19.9615,
+      "longitude": 79.2961,
+      "compatibility_score": 32.24
+    },
+    {
+      "region": "Amravati",
+      "latitude": 20.932,
+      "longitude": 77.7523,
+      "compatibility_score": 32.02
+    },
+    {
+      "region": "Wardha",
+      "latitude": 20.7453,
+      "longitude": 78.6022,
+      "compatibility_score": 27.25
+    },
+    {
+      "region": "Osmanabad",
+      "latitude": 18.1853,
+      "longitude": 76.042,
+      "compatibility_score": 26.61
+    }
+  ],
+  "Mango": [
+    {
+      "region": "Akola",
+      "latitude": 20.7002,
+      "longitude": 77.0082,
+      "compatibility_score": 35.89
+    },
+    {
+      "region": "Chandrapur",
+      "latitude": 19.9615,
+      "longitude": 79.2961,
+      "compatibility_score": 35.68
+    },
+    {
+      "region": "Amravati",
+      "latitude": 20.932,
+      "longitude": 77.7523,
+      "compatibility_score": 35.39
+    },
+    {
+      "region": "Wardha",
+      "latitude": 20.7453,
+      "longitude": 78.6022,
+      "compatibility_score": 30.12
+    },
+    {
+      "region": "Osmanabad",
+      "latitude": 18.1853,
+      "longitude": 76.042,
+      "compatibility_score": 29.34
+    }
+  ]
+}

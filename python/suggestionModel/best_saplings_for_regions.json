@@ -1,0 +1,816 @@
+{
+  "Ahmednagar (19.0952, 74.7496)": [
+    {
+      "species": "Amla",
+      "compatibility_score": 17.1
+    },
+    {
+      "species": "Teak",
+      "compatibility_score": 17.01
+    },
+    {
+      "species": "Mango",
+      "compatibility_score": 15.81
+    },
+    {
+      "species": "Peepal",
+      "compatibility_score": 15.27
+    },
+    {
+      "species": "Neem",
+      "compatibility_score": 14.72
+    }
+  ],
+  "Akola (20.7002, 77.0082)": [
+    {
+      "species": "Teak",
+      "compatibility_score": 39.94
+    },
+    {
+      "species": "Amla",
+      "compatibility_score": 39.69
+    },
+    {
+      "species": "Mango",
+      "compatibility_score": 35.89
+    },
+    {
+      "species": "Peepal",
+      "compatibility_score": 33.93
+    },
+    {
+      "species": "Neem",
+      "compatibility_score": 33.01
+    }
+  ],
+  "Alibag (18.6414, 72.8722)": [
+    {
+      "species": "Bamboo",
+      "compatibility_score": 5.47
+    },
+    {
+      "species": "Sal",
+      "compatibility_score": 5.23
+    },
+    {
+      "species": "Arjun",
+      "compatibility_score": 5.23
+    },
+    {
+      "species": "Banyan",
+      "compatibility_score": 4.86
+    },
+    {
+      "species": "Jamun",
+      "compatibility_score": 4.78
+    }
+  ],
+  "Amravati (20.932, 77.7523)": [
+    {
+      "species": "Teak",
+      "compatibility_score": 38.39
+    },
+    {
+      "species": "Amla",
+      "compatibility_score": 38.18
+    },
+    {
+      "species": "Mango",
+      "compatibility_score": 35.39
+    },
+    {
+      "species": "Peepal",
+      "compatibility_score": 33.44
+    },
+    {
+      "species": "Banyan",
+      "compatibility_score": 32.46
+    }
+  ],
+  "Aurangabad (19.8762, 75.3433)": [
+    {
+      "species": "Teak",
+      "compatibility_score": 31.23
+    },
+    {
+      "species": "Amla",
+      "compatibility_score": 31.07
+    },
+    {
+      "species": "Mango",
+      "compatibility_score": 28.72
+    },
+    {
+      "species": "Peepal",
+      "compatibility_score": 26.88
+    },
+    {
+      "species": "Neem",
+      "compatibility_score": 26.24
+    }
+  ],
+  "Beed (18.9891, 75.7601)": [
+    {
+      "species": "Teak",
+      "compatibility_score": 30.43
+    },
+    {
+      "species": "Amla",
+      "compatibility_score": 30.12
+    },
+    {
+      "species": "Mango",
+      "compatibility_score": 27.57
+    },
+    {
+      "species": "Peepal",
+      "compatibility_score": 26.07
+    },
+    {
+      "species": "Neem",
+      "compatibility_score": 25.73
+    }
+  ],
+  "Bhandara (21.1777, 79.657)": [
+    {
+      "species": "Teak",
+      "compatibility_score": 28.55
+    },
+    {
+      "species": "Amla",
+      "compatibility_score": 28.4
+    },
+    {
+      "species": "Neem",
+      "compatibility_score": 25.65
+    },
+    {
+      "species": "Mango",
+      "compatibility_score": 25.39
+    },
+    {
+      "species": "Peepal",
+      "compatibility_score": 23.82
+    }
+  ],
+  "Buldhana (20.5292, 76.1823)": [
+    {
+      "species": "Teak",
+      "compatibility_score": 21.41
+    },
+    {
+      "species": "Amla",
+      "compatibility_score": 21.22
+    },
+    {
+      "species": "Mango",
+      "compatibility_score": 19.28
+    },
+    {
+      "species": "Neem",
+      "compatibility_score": 19.26
+    },
+    {
+      "species": "Peepal",
+      "compatibility_score": 18.33
+    }
+  ],
+  "Chandrapur (19.9615, 79.2961)": [
+    {
+      "species": "Teak",
+      "compatibility_score": 38.73
+    },
+    {
+      "species": "Amla",
+      "compatibility_score": 38.55
+    },
+    {
+      "species": "Mango",
+      "compatibility_score": 35.68
+    },
+    {
+      "species": "Peepal",
+      "compatibility_score": 33.73
+    },
+    {
+      "species": "Banyan",
+      "compatibility_score": 32.7
+    }
+  ],
+  "Dhule (20.9042, 74.7749)": [
+    {
+      "species": "Teak",
+      "compatibility_score": 28.9
+    },
+    {
+      "species": "Amla",
+      "compatibility_score": 28.57
+    },
+    {
+      "species": "Neem",
+      "compatibility_score": 26.15
+    },
+    {
+      "species": "Mango",
+      "compatibility_score": 26.05
+    },
+    {
+      "species": "Peepal",
+      "compatibility_score": 24.69
+    }
+  ],
+  "Gadchiroli (20.1849, 79.9948)": [
+    {
+      "species": "Teak",
+      "compatibility_score": 18.13
+    },
+    {
+      "species": "Amla",
+      "compatibility_score": 17.92
+    },
+    {
+      "species": "Neem",
+      "compatibility_score": 16.44
+    },
+    {
+      "species": "Mango",
+      "compatibility_score": 16.35
+    },
+    {
+      "species": "Peepal",
+      "compatibility_score": 15.54
+    }
+  ],
+  "Gondia (21.4624, 80.221)": [
+    {
+      "species": "Teak",
+      "compatibility_score": 27.78
+    },
+    {
+      "species": "Amla",
+      "compatibility_score": 27.69
+    },
+    {
+      "species": "Neem",
+      "compatibility_score": 24.92
+    },
+    {
+      "species": "Mango",
+      "compatibility_score": 24.8
+    },
+    {
+      "species": "Peepal",
+      "compatibility_score": 23.26
+    }
+  ],
+  "Hingoli (19.7178, 77.1467)": [
+    {
+      "species": "Teak",
+      "compatibility_score": 30.29
+    },
+    {
+      "species": "Amla",
+      "compatibility_score": 30.04
+    },
+    {
+      "species": "Mango",
+      "compatibility_score": 27.19
+    },
+    {
+      "species": "Neem",
+      "compatibility_score": 26.78
+    },
+    {
+      "species": "Peepal",
+      "compatibility_score": 25.47
+    }
+  ],
+  "Jalgaon (21.0077, 75.5626)": [
+    {
+      "species": "Teak",
+      "compatibility_score": 28.78
+    },
+    {
+      "species": "Amla",
+      "compatibility_score": 28.51
+    },
+    {
+      "species": "Mango",
+      "compatibility_score": 26.39
+    },
+    {
+      "species": "Peepal",
+      "compatibility_score": 24.89
+    },
+    {
+      "species": "Neem",
+      "compatibility_score": 24.51
+    }
+  ],
+  "Jalna (19.8297, 75.88)": [
+    {
+      "species": "Teak",
+      "compatibility_score": 32.39
+    },
+    {
+      "species": "Amla",
+      "compatibility_score": 32.1
+    },
+    {
+      "species": "Mango",
+      "compatibility_score": 28.81
+    },
+    {
+      "species": "Neem",
+      "compatibility_score": 27.47
+    },
+    {
+      "species": "Peepal",
+      "compatibility_score": 27.24
+    }
+  ],
+  "Kolhapur (16.705, 74.2433)": [
+    {
+      "species": "Teak",
+      "compatibility_score": 19.57
+    },
+    {
+      "species": "Amla",
+      "compatibility_score": 19.43
+    },
+    {
+      "species": "Mango",
+      "compatibility_score": 17.99
+    },
+    {
+      "species": "Peepal",
+      "compatibility_score": 17.17
+    },
+    {
+      "species": "Neem",
+      "compatibility_score": 16.7
+    }
+  ],
+  "Latur (18.4088, 76.5604)": [
+    {
+      "species": "Teak",
+      "compatibility_score": 19.7
+    },
+    {
+      "species": "Amla",
+      "compatibility_score": 19.46
+    },
+    {
+      "species": "Neem",
+      "compatibility_score": 17.82
+    },
+    {
+      "species": "Mango",
+      "compatibility_score": 17.79
+    },
+    {
+      "species": "Peepal",
+      "compatibility_score": 16.83
+    }
+  ],
+  "Malegaon (20.5579, 74.5089)": [
+    {
+      "species": "Teak",
+      "compatibility_score": 19.22
+    },
+    {
+      "species": "Amla",
+      "compatibility_score": 19.22
+    },
+    {
+      "species": "Mango",
+      "compatibility_score": 17.77
+    },
+    {
+      "species": "Neem",
+      "compatibility_score": 17.67
+    },
+    {
+      "species": "Peepal",
+      "compatibility_score": 16.77
+    }
+  ],
+  "Mumbai (19.076, 72.8777)": [
+    {
+      "species": "Bamboo",
+      "compatibility_score": 5.92
+    },
+    {
+      "species": "Arjun",
+      "compatibility_score": 5.64
+    },
+    {
+      "species": "Sal",
+      "compatibility_score": 5.63
+    },
+    {
+      "species": "Banyan",
+      "compatibility_score": 5.25
+    },
+    {
+      "species": "Jamun",
+      "compatibility_score": 5.21
+    }
+  ],
+  "Nagpur (21.1458, 79.0882)": [
+    {
+      "species": "Teak",
+      "compatibility_score": 27.99
+    },
+    {
+      "species": "Amla",
+      "compatibility_score": 27.89
+    },
+    {
+      "species": "Neem",
+      "compatibility_score": 25.17
+    },
+    {
+      "species": "Mango",
+      "compatibility_score": 25.07
+    },
+    {
+      "species": "Peepal",
+      "compatibility_score": 23.57
+    }
+  ],
+  "Nanded (19.1383, 77.3067)": [
+    {
+      "species": "Teak",
+      "compatibility_score": 20.73
+    },
+    {
+      "species": "Amla",
+      "compatibility_score": 20.46
+    },
+    {
+      "species": "Mango",
+      "compatibility_score": 18.55
+    },
+    {
+      "species": "Peepal",
+      "compatibility_score": 17.86
+    },
+    {
+      "species": "Banyan",
+      "compatibility_score": 17.29
+    }
+  ],
+  "Nandurbar (21.37, 74.25)": [
+    {
+      "species": "Teak",
+      "compatibility_score": 22.69
+    },
+    {
+      "species": "Amla",
+      "compatibility_score": 22.57
+    },
+    {
+      "species": "Mango",
+      "compatibility_score": 21.23
+    },
+    {
+      "species": "Peepal",
+      "compatibility_score": 20.45
+    },
+    {
+      "species": "Neem",
+      "compatibility_score": 19.96
+    }
+  ],
+  "Nashik (19.9975, 73.7898)": [
+    {
+      "species": "Teak",
+      "compatibility_score": 3.51
+    },
+    {
+      "species": "Amla",
+      "compatibility_score": 3.43
+    },
+    {
+      "species": "Neem",
+      "compatibility_score": 3.2
+    },
+    {
+      "species": "Mango",
+      "compatibility_score": 3.17
+    },
+    {
+      "species": "Peepal",
+      "compatibility_score": 3.03
+    }
+  ],
+  "Navi Mumbai (19.033, 73.0297)": [
+    {
+      "species": "Bamboo",
+      "compatibility_score": 4.9
+    },
+    {
+      "species": "Arjun",
+      "compatibility_score": 4.68
+    },
+    {
+      "species": "Sal",
+      "compatibility_score": 4.65
+    },
+    {
+      "species": "Banyan",
+      "compatibility_score": 4.31
+    },
+    {
+      "species": "Jamun",
+      "compatibility_score": 4.26
+    }
+  ],
+  "Osmanabad (18.1853, 76.042)": [
+    {
+      "species": "Teak",
+      "compatibility_score": 32.73
+    },
+    {
+      "species": "Amla",
+      "compatibility_score": 32.42
+    },
+    {
+      "species": "Mango",
+      "compatibility_score": 29.34
+    },
+    {
+      "species": "Peepal",
+      "compatibility_score": 27.66
+    },
+    {
+      "species": "Neem",
+      "compatibility_score": 27.25
+    }
+  ],
+  "Parbhani (19.2644, 76.7855)": [
+    {
+      "species": "Teak",
+      "compatibility_score": 25.8
+    },
+    {
+      "species": "Amla",
+      "compatibility_score": 25.69
+    },
+    {
+      "species": "Neem",
+      "compatibility_score": 23.13
+    },
+    {
+      "species": "Mango",
+      "compatibility_score": 23.08
+    },
+    {
+      "species": "Peepal",
+      "compatibility_score": 21.42
+    }
+  ],
+  "Pune (18.5204, 73.8567)": [
+    {
+      "species": "Amla",
+      "compatibility_score": 2.06
+    },
+    {
+      "species": "Teak",
+      "compatibility_score": 2.04
+    },
+    {
+      "species": "Neem",
+      "compatibility_score": 1.92
+    },
+    {
+      "species": "Mango",
+      "compatibility_score": 1.91
+    },
+    {
+      "species": "Peepal",
+      "compatibility_score": 1.8
+    }
+  ],
+  "Ratnagiri (16.9902, 73.312)": [
+    {
+      "species": "Bamboo",
+      "compatibility_score": 4.56
+    },
+    {
+      "species": "Arjun",
+      "compatibility_score": 4.38
+    },
+    {
+      "species": "Sal",
+      "compatibility_score": 4.33
+    },
+    {
+      "species": "Banyan",
+      "compatibility_score": 4.02
+    },
+    {
+      "species": "Jamun",
+      "compatibility_score": 3.98
+    }
+  ],
+  "Sangli (16.8524, 74.5815)": [
+    {
+      "species": "Amla",
+      "compatibility_score": 15.78
+    },
+    {
+      "species": "Teak",
+      "compatibility_score": 15.7
+    },
+    {
+      "species": "Mango",
+      "compatibility_score": 14.43
+    },
+    {
+      "species": "Peepal",
+      "compatibility_score": 13.82
+    },
+    {
+      "species": "Neem",
+      "compatibility_score": 13.49
+    }
+  ],
+  "Satara (17.6805, 74.0183)": [
+    {
+      "species": "Teak",
+      "compatibility_score": 3.24
+    },
+    {
+      "species": "Amla",
+      "compatibility_score": 3.2
+    },
+    {
+      "species": "Neem",
+      "compatibility_score": 3.02
+    },
+    {
+      "species": "Mango",
+      "compatibility_score": 3.0
+    },
+    {
+      "species": "Peepal",
+      "compatibility_score": 2.86
+    }
+  ],
+  "Sindhudurg (16.118, 73.6597)": [
+    {
+      "species": "Bamboo",
+      "compatibility_score": 4.22
+    },
+    {
+      "species": "Arjun",
+      "compatibility_score": 4.07
+    },
+    {
+      "species": "Sal",
+      "compatibility_score": 4.04
+    },
+    {
+      "species": "Banyan",
+      "compatibility_score": 3.76
+    },
+    {
+      "species": "Jamun",
+      "compatibility_score": 3.74
+    }
+  ],
+  "Solapur (17.6599, 75.9064)": [
+    {
+      "species": "Teak",
+      "compatibility_score": 20.42
+    },
+    {
+      "species": "Amla",
+      "compatibility_score": 20.22
+    },
+    {
+      "species": "Mango",
+      "compatibility_score": 18.32
+    },
+    {
+      "species": "Peepal",
+      "compatibility_score": 17.54
+    },
+    {
+      "species": "Neem",
+      "compatibility_score": 17.43
+    }
+  ],
+  "Thane (19.2183, 72.9781)": [
+    {
+      "species": "Bamboo",
+      "compatibility_score": 7.18
+    },
+    {
+      "species": "Arjun",
+      "compatibility_score": 6.87
+    },
+    {
+      "species": "Sal",
+      "compatibility_score": 6.85
+    },
+    {
+      "species": "Banyan",
+      "compatibility_score": 6.4
+    },
+    {
+      "species": "Jamun",
+      "compatibility_score": 6.36
+    }
+  ],
+  "Vasai-Virar (19.3919, 72.8397)": [
+    {
+      "species": "Bamboo",
+      "compatibility_score": 3.22
+    },
+    {
+      "species": "Arjun",
+      "compatibility_score": 3.15
+    },
+    {
+      "species": "Sal",
+      "compatibility_score": 3.12
+    },
+    {
+      "species": "Banyan",
+      "compatibility_score": 2.95
+    },
+    {
+      "species": "Teak",
+      "compatibility_score": 2.9
+    }
+  ],
+  "Wardha (20.7453, 78.6022)": [
+    {
+      "species": "Teak",
+      "compatibility_score": 32.75
+    },
+    {
+      "species": "Amla",
+      "compatibility_score": 32.51
+    },
+    {
+      "species": "Mango",
+      "compatibility_score": 30.12
+    },
+    {
+      "species": "Peepal",
+      "compatibility_score": 28.4
+    },
+    {
+      "species": "Neem",
+      "compatibility_score": 27.76
+    }
+  ],
+  "Washim (20.1118, 77.1328)": [
+    {
+      "species": "Teak",
+      "compatibility_score": 25.85
+    },
+    {
+      "species": "Amla",
+      "compatibility_score": 25.72
+    },
+    {
+      "species": "Neem",
+      "compatibility_score": 23.58
+    },
+    {
+      "species": "Mango",
+      "compatibility_score": 23.47
+    },
+    {
+      "species": "Peepal",
+      "compatibility_score": 22.32
+    }
+  ],
+  "Yavatmal (20.3888, 78.1204)": [
+    {
+      "species": "Teak",
+      "compatibility_score": 28.73
+    },
+    {
+      "species": "Amla",
+      "compatibility_score": 28.55
+    },
+    {
+      "species": "Neem",
+      "compatibility_score": 25.76
+    },
+    {
+      "species": "Mango",
+      "compatibility_score": 25.58
+    },
+    {
+      "species": "Peepal",
+      "compatibility_score": 24.1
+    }
+  ]
+}

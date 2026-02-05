@@ -1,0 +1,23 @@
+{
+    "latitude": 16.118,
+    "longitude": 73.6597,
+    "sapling_type": "Mango",
+    "prediction_date": "2026-02-05",
+    "Sample_ID": "S_1611_7365",
+    "risk_rating": "Medium",
+    "rainfall_weekly": -0.0016,
+    "rainfall_30d": 3.3078,
+    "rainfall_90d": 412.4415,
+    "temp_mean": 20.5015,
+    "temp_max": 24.7162,
+    "temp_min": 16.2857,
+    "humidity_mean": 80.2474,
+    "wind_speed": 6.8593,
+    "solar_radiation": 22.2609,
+    "et0": 2.8935,
+    "pH": 6.5355,
+    "Org_Carbon_pct": 3.4927,
+    "Nitrogen_pct": 0.2599,
+    "Depth_cm": 10.0,
+    "Texture_Code": "CL"
+}

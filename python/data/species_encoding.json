@@ -1,0 +1,26 @@
+{
+  "species_to_encoded": {
+    "Amla": 0,
+    "Arjun": 1,
+    "Bamboo": 2,
+    "Banyan": 3,
+    "Jamun": 4,
+    "Mango": 5,
+    "Neem": 6,
+    "Peepal": 7,
+    "Sal": 8,
+    "Teak": 9
+  },
+  "encoded_to_species": {
+    "0": "Amla",
+    "1": "Arjun",
+    "2": "Bamboo",
+    "3": "Banyan",
+    "4": "Jamun",
+    "5": "Mango",
+    "6": "Neem",
+    "7": "Peepal",
+    "8": "Sal",
+    "9": "Teak"
+  }
+}
