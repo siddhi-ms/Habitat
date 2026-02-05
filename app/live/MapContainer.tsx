@@ -380,6 +380,35 @@ export function MapContainer({
         data: getSindhudurgVillagesGeoJSON() as unknown as GeoJSON.FeatureCollection,
       });
 
+      // Attempt to replace static sources with live data from the Groq proxy
+      (async () => {
+        try {
+          const tryFetch = async (type: string, sourceId: string) => {
+            const resp = await fetch('/api/groq', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ type }),
+            });
+            if (!resp.ok) return null;
+            const json = await resp.json();
+            if (json && json.features && map.getSource(sourceId)) {
+              (map.getSource(sourceId) as maplibregl.GeoJSONSource).setData(json);
+              return true;
+            }
+            return null;
+          };
+
+          await tryFetch('india_states', 'india-states');
+          await tryFetch('maharashtra_districts', 'mh-districts');
+          await tryFetch('sindhudurg_talukas', 'sindhudurg-talukas');
+          await tryFetch('sindhudurg_villages', 'sindhudurg-villages');
+        } catch (err) {
+          // Keep static data on any failure; log for debugging.
+          // eslint-disable-next-line no-console
+          console.warn('Live Groq fetch failed, using static data', err);
+        }
+      })();
+
       // India states - hidden by default, shows data when overlay is selected
       map.addLayer({
         id: LAYERS.statesFill,
@@ -868,7 +897,7 @@ export function MapContainer({
         }
       });
 
-      map.on("click", LAYERS.districtsFill, (e: MapLayerMouseEvent) => {
+      map.on("click", LAYERS.districtsFill, async (e: MapLayerMouseEvent) => {
         const f = e.features?.[0];
         if (!f?.properties) return;
         const p = f.properties as unknown as DistrictProps;
@@ -877,7 +906,36 @@ export function MapContainer({
         if (p.name === "Sindhudurg") {
           switchToSindhudurg();
         } else {
-          onDistrictSelect(toDistrictPanelData(p));
+          // Try to fetch dynamic data from Groq API
+          try {
+            // Show loading state (optional, but good UX - maybe pass a loading placeholder first)
+            // For now, we'll optimistically try fetching. 
+            // Ideally we'd show a spinner in the panel, but onDistrictSelect typically opens it immediately.
+            // We can pass a "loading" state if the panel supports it, or just wait.
+            // Let's rely on the quick API response or fallback.
+            
+            const response = await fetch("/api/groq", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ 
+                type: "district_intelligence", 
+                district: p.name 
+              }),
+            });
+
+            if (response.ok) {
+              const liveData = await response.json();
+              if (liveData && liveData.suitabilityScore) {
+                 onDistrictSelect(liveData);
+                 return;
+              }
+            }
+            throw new Error("Invalid API response");
+          } catch (err) {
+            console.error("Failed to fetch live district data, falling back to static:", err);
+            // Fallback to local calculation
+            onDistrictSelect(toDistrictPanelData(p));
+          }
         }
       });
 
