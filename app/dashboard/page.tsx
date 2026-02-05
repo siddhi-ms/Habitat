@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
-import { 
-  Plus, TreeDeciduous, MapPin, Loader2, LogOut, 
+import {
+  Plus, TreeDeciduous, MapPin, Loader2, LogOut,
   FolderOpen, PlayCircle, Activity, ChevronRight, Leaf
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -41,7 +41,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#F2F9F5] text-slate-900 font-sans selection:bg-emerald-200">
-      
+
       {/* --- FLOATING NATURE ACCENTS --- */}
       <div className="fixed inset-0 pointer-events-none opacity-20 overflow-hidden">
         <Leaf className="absolute -top-10 -left-10 text-emerald-200 rotate-45" size={300} />
@@ -56,9 +56,9 @@ export default function DashboardPage() {
           </div>
           <span className="font-black text-xl tracking-tight text-emerald-900">Privthi</span>
         </div>
-        
-        <button 
-          onClick={handleSignOut} 
+
+        <button
+          onClick={handleSignOut}
           className="text-emerald-700/50 hover:text-rose-600 transition-colors text-[10px] font-black uppercase tracking-widest flex items-center gap-2"
         >
           <LogOut size={14} /> Sign Out
@@ -66,7 +66,7 @@ export default function DashboardPage() {
       </nav>
 
       <main className="max-w-7xl mx-auto p-8 md:p-16 relative z-10">
-        
+
         {/* --- MINIMALIST HEADER --- */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-8">
           <div className="space-y-1">
@@ -94,58 +94,63 @@ export default function DashboardPage() {
 
         {/* --- PROJECT GRID --- */}
         {loading ? (
-          <div className="h-64 flex flex-col items-center justify-center">
-            <div className="relative">
-              <Loader2 className="animate-spin text-emerald-600" size={40} />
-              <div className="absolute inset-0 bg-emerald-400 blur-xl opacity-20 animate-pulse"></div>
-            </div>
+          <div className="flex flex-col items-center justify-center py-32 text-slate-400">
+            <Loader2 className="animate-spin mb-4" size={48} />
+            <p className="font-medium animate-pulse">Syncing with database...</p>
           </div>
         ) : projects.length === 0 ? (
-          <div className="bg-white/50 border-2 border-dashed border-emerald-100 rounded-[3rem] p-24 text-center">
-            <div className="bg-white w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
-                <FolderOpen className="text-emerald-100" size={40} />
-            </div>
-            <h3 className="text-xl font-bold text-emerald-900 mb-2">No active sites</h3>
-            <p className="text-emerald-700/50 max-w-xs mx-auto">Begin your journey by deploying your first restoration node.</p>
+          <div className="bg-white border-2 border-dashed border-slate-200 rounded-[2rem] p-20 text-center">
+            <FolderOpen className="mx-auto text-slate-200 mb-6" size={80} />
+            <h3 className="text-2xl font-bold text-slate-900 mb-2">No Active Projects</h3>
+            <p className="text-slate-500 max-w-xs mx-auto">Click "New Project" to start tracking your first restoration site.</p>
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {projects.map((project) => (
-              <Link key={project.id} href={`/project/${project.id}`} className="group">
-                <div className="bg-white border border-emerald-50 rounded-[2.5rem] p-8 transition-all duration-500 hover:shadow-[0_30px_60px_-15px_rgba(16,185,129,0.15)] hover:-translate-y-2 relative">
-                  
-                  <div className="flex justify-between items-start mb-10">
-                    <div className="p-3 rounded-2xl bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-500">
-                      <TreeDeciduous size={24} />
+              <Link key={project.id} href={`/project/${project.id}`}>
+                <div className="group relative bg-white rounded-[2.5rem] border border-slate-200/60 p-8 shadow-sm hover:shadow-2xl hover:shadow-emerald-100 hover:-translate-y-2 transition-all duration-500 cursor-pointer h-full flex flex-col overflow-hidden">
+                  {/* Glassmorphism Background Accent */}
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-emerald-100 transition-colors duration-500" />
+
+                  <div className="flex justify-between items-start mb-8 relative z-10">
+                    <div className="bg-emerald-50 p-4 rounded-2xl text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300 shadow-sm">
+                      <TreeDeciduous size={32} />
                     </div>
-                    <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-50/50 rounded-full text-[10px] font-black text-emerald-600 uppercase tracking-widest border border-emerald-100/30">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Live
+                    <div className="flex flex-col items-end gap-2">
+                      <span className={`text-[10px] font-black tracking-widest px-4 py-1.5 rounded-full uppercase ${project.status === 'Active' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'
+                        }`}>
+                        {project.status || 'Active'}
+                      </span>
                     </div>
                   </div>
 
-                  <h3 className="text-2xl font-black text-emerald-950 mb-1 group-hover:text-emerald-600 transition-colors">
-                    {project.name}
-                  </h3>
-                  
-                  <div className="flex items-center gap-2 text-emerald-800/40 text-[10px] font-black mb-10 uppercase tracking-widest">
-                    <MapPin size={12} className="text-emerald-400" />
-                    {project.lat.toFixed(2)} / {project.lng.toFixed(2)}
+                  <div className="relative z-10">
+                    <h3 className="text-3xl font-black text-slate-900 mb-2 leading-tight group-hover:text-emerald-700 transition-colors">{project.name}</h3>
+
+                    <p className="text-slate-500 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider mb-8">
+                      <MapPin size={14} className="text-emerald-500" />
+                      {project.lat.toFixed(4)}°N, {project.lng.toFixed(4)}°E
+                    </p>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 pt-6 border-t border-emerald-50/60 items-end">
-                    <div>
-                      <p className="text-[10px] font-black text-emerald-900/20 uppercase tracking-[0.2em] mb-1">Species</p>
-                      <p className="text-emerald-900/70 font-bold text-sm truncate">{project.species}</p>
+                  <div className="mt-auto pt-8 border-t border-slate-100 flex justify-between items-center relative z-10">
+                    <div className="flex flex-col">
+                      <span className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Species</span>
+                      <span className="text-slate-900 font-bold text-base">{project.species}</span>
                     </div>
                     <div className="text-right">
-                      <p className="text-[10px] font-black text-emerald-900/20 uppercase tracking-[0.2em] mb-1">Vitality</p>
-                      <p className="text-emerald-600 font-black text-2xl tracking-tighter">{project.survival_rate || '98'}%</p>
+                      <span className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-1 block">Survival</span>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-emerald-600 font-black text-3xl tabular-nums">
+                          {project.survival_rate ? project.survival_rate.replace('%', '') : '100'}
+                        </span>
+                        <span className="text-emerald-600/60 font-black text-sm">%</span>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="absolute bottom-6 right-8 translate-x-4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all">
-                    <ChevronRight size={18} className="text-emerald-300" />
-                  </div>
+                  {/* Progressive Hover Indicator */}
+                  <div className="absolute bottom-0 left-0 w-full h-1 bg-emerald-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
                 </div>
               </Link>
             ))}
@@ -156,9 +161,9 @@ export default function DashboardPage() {
       {/* --- SOFT FOOTER --- */}
       <footer className="p-16 mt-12 text-center">
         <div className="inline-flex items-center gap-4 bg-white/40 px-6 py-2 rounded-full border border-emerald-100/50 backdrop-blur-sm shadow-sm">
-            <span className="text-emerald-800/30 font-black text-[9px] uppercase tracking-[0.5em]">
-              © Privthi Ecosystems MMXXVI
-            </span>
+          <span className="text-emerald-800/30 font-black text-[9px] uppercase tracking-[0.5em]">
+            © Privthi Ecosystems MMXXVI
+          </span>
         </div>
       </footer>
     </div>

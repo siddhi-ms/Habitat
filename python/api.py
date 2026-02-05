@@ -89,10 +89,12 @@ class PredictionResponse(BaseModel):
     Texture_Code_encoded: int
     Texture_Code: Optional[str] = None  # decoded texture name
     
-    # Additional metadata
+    # Metadata and Analytics
     Sample_ID: Optional[str] = None
     Soil_Collection_Date: Optional[str] = None
-    risk_rating: Optional[str] = None
+    risk_rating: str
+    risk_score: float
+    survival_rate: float
     
     # Warning Analytics
     warning_analytics: Optional[dict] = None
@@ -195,36 +197,124 @@ def load_trees_data():
         }], index=['Neem'])
 
 
-def calculate_risk_rating(predictions, tree_species_data):
-    """Calculate risk rating based on predictions and tree species requirements."""
-    risk_factors = []
-    
-    # Check rainfall
-    rainfall_30d = predictions.get('rainfall_30d', 0)
-    min_rainfall = tree_species_data.get('min_rainfall_norm', 0.5)
+def calculate_survival_metrics(predictions, tree_species_data):
+    """Calculate survival rate and risk from normalized predictions vs species norms.
+    Uses capped contributions so scores stay in a realistic range (not always 100/0).
+    """
+    risk_score = 0.0
+    cap = 25.0  # max per factor
+
+    # Rainfall factor (25% weight) — normalized comparison, cap deficit
+    rainfall_30d = float(predictions.get('rainfall_30d', 0.5))
+    min_rainfall = float(tree_species_data.get('min_rainfall_norm', 0.5))
     if rainfall_30d < min_rainfall:
-        risk_factors.append("low_rainfall")
-    
-    # Check temperature
-    temp_max = predictions.get('temp_max', 0)
-    max_temp = tree_species_data.get('max_temp_norm', 0.5)
+        deficit = min(1.0, (min_rainfall - rainfall_30d) / max(0.01, min_rainfall))
+        risk_score += deficit * cap
+
+    # Temperature factor (25% weight)
+    temp_max = float(predictions.get('temp_max', 0.5))
+    max_temp = float(tree_species_data.get('max_temp_norm', 0.5))
     if temp_max > max_temp:
-        risk_factors.append("high_temperature")
-    
-    # Check pH
-    pH = predictions.get('pH', 0)
-    ph_min = tree_species_data.get('ph_min_norm', 0.4)
-    ph_max = tree_species_data.get('ph_max_norm', 0.8)
-    if pH < ph_min or pH > ph_max:
-        risk_factors.append("ph_mismatch")
-    
-    # Determine risk rating
-    if len(risk_factors) == 0:
-        return "Low"
-    elif len(risk_factors) <= 2:
-        return "Medium"
+        excess = min(1.0, (temp_max - max_temp) / max(0.01, 1.0 - max_temp))
+        risk_score += excess * cap
+
+    # pH factor (25% weight)
+    pH = float(predictions.get('pH', 0.5))
+    ph_min = float(tree_species_data.get('ph_min_norm', 0.4))
+    ph_max = float(tree_species_data.get('ph_max_norm', 0.8))
+    if pH < ph_min:
+        deficit = min(1.0, (ph_min - pH) / max(0.01, ph_min))
+        risk_score += deficit * cap
+    elif pH > ph_max:
+        excess = min(1.0, (pH - ph_max) / max(0.01, 1.0 - ph_max))
+        risk_score += excess * cap
+
+    # Soil/Nutrient factor (25% weight)
+    carbon = float(predictions.get('Org_Carbon_pct', 0.5))
+    nitrogen = float(predictions.get('Nitrogen_pct', 0.5))
+    health_factor = (carbon + nitrogen) / 2
+    if health_factor < 0.3:
+        risk_score += min(cap, (0.3 - health_factor) * 50)
+
+    risk_score = min(100.0, max(0.0, risk_score))
+    survival_rate = 100.0 - risk_score
+
+    if risk_score < 20:
+        rating = "Low"
+    elif risk_score < 50:
+        rating = "Medium"
     else:
-        return "High"
+        rating = "High"
+
+    return {
+        "risk_score": round(risk_score, 2),
+        "survival_rate": round(survival_rate, 2),
+        "risk_rating": rating
+    }
+
+
+def calculate_survival_metrics_from_decoded(decoded):
+    """Compute survival/risk from decoded (real-world) values for more realistic spread.
+    Uses typical reforestation suitability ranges (rainfall mm, temp °C, pH, fertility).
+    """
+    rainfall_30d = float(decoded.get('rainfall_30d', 130))
+    temp_max = float(decoded.get('temp_max', 32))
+    pH = float(decoded.get('pH', 7.5))
+    carbon = float(decoded.get('Org_Carbon_pct', 1.0))
+    nitrogen = float(decoded.get('Nitrogen_pct', 0.08))
+
+    # Suitability 0–100 per factor (higher = better for survival)
+    # Rainfall: 0–50 mm poor, 50–200 moderate, 200–500 good, >500 very good
+    if rainfall_30d <= 0:
+        rain_score = 0
+    elif rainfall_30d < 50:
+        rain_score = rainfall_30d * 0.6
+    elif rainfall_30d < 200:
+        rain_score = 30 + (rainfall_30d - 50) * 0.4
+    elif rainfall_30d < 500:
+        rain_score = 90 + (rainfall_30d - 200) / 30
+    else:
+        rain_score = 100
+    rain_score = min(100, max(0, rain_score))
+
+    # Temp: 20–38 °C ideal; outside penalized
+    if temp_max < 15 or temp_max > 42:
+        temp_score = 20
+    elif temp_max < 20 or temp_max > 38:
+        temp_score = 50 + (20 - abs(temp_max - 29)) * 2.5
+    else:
+        temp_score = 70 + (18 - abs(temp_max - 29)) * 1.5
+    temp_score = min(100, max(0, temp_score))
+
+    # pH: 6–8.5 ideal
+    if pH < 4.5 or pH > 9:
+        ph_score = 20
+    elif 6 <= pH <= 8.5:
+        ph_score = 90
+    else:
+        ph_score = 50 + (8 - abs(pH - 7.25)) * 10
+    ph_score = min(100, max(0, ph_score))
+
+    # Fertility proxy from carbon + nitrogen (typical 0.5–2% C, 0.05–0.15% N)
+    fertility = (min(carbon, 2) / 2 * 50) + (min(nitrogen, 0.2) / 0.2 * 50)
+    fertility = min(100, max(0, fertility))
+
+    survival_rate = (rain_score * 0.3 + temp_score * 0.25 + ph_score * 0.25 + fertility * 0.2)
+    survival_rate = min(100.0, max(0.0, survival_rate))
+    risk_score = 100.0 - survival_rate
+
+    if risk_score < 20:
+        rating = "Low"
+    elif risk_score < 50:
+        rating = "Medium"
+    else:
+        rating = "High"
+
+    return {
+        "risk_score": round(risk_score, 2),
+        "survival_rate": round(survival_rate, 2),
+        "risk_rating": rating
+    }
 
 
 def load_suggestion_data():
@@ -278,8 +368,12 @@ async def startup_event():
     trees_df = load_trees_data()
     # Load decode params for output
     load_decode_params()
+    
+    # Configure results directory
+    results_dir = os.path.join(os.path.dirname(__file__), 'results')
+    os.makedirs(results_dir, exist_ok=True)
     global RESULT_JSON_PATH
-    RESULT_JSON_PATH = os.path.join(os.path.dirname(__file__), 'result.json')
+    RESULT_JSON_PATH = os.path.join(results_dir, 'result.json')
     
     # Initialize Random Forest predictor
     print("Loading Random Forest model...")
@@ -440,8 +534,11 @@ async def predict(request: PredictionRequest):
                 warning_info["health_risk"] = health_info
                 warning_info["weather_alerts"] = weather_stress
         
-        # Risk rating uses normalized thresholds from trees.csv, so use encoded predictions
-        risk_rating = calculate_risk_rating(predictions, tree_species_data)
+        # Risk and Survival Metrics from decoded (real-world) values for realistic spread
+        metrics = calculate_survival_metrics_from_decoded(decoded)
+        risk_rating = metrics["risk_rating"]
+        risk_score = metrics["risk_score"]
+        survival_rate = metrics["survival_rate"]
         
         # Generate sample ID (based on location)
         sample_id = f"S_{int(request.latitude * 100)}_{int(request.longitude * 100)}"
@@ -471,6 +568,8 @@ async def predict(request: PredictionRequest):
             "Sample_ID": sample_id,
             "Soil_Collection_Date": pred_date.strftime("%Y-%m-%d"),
             "risk_rating": risk_rating,
+            "risk_score": risk_score,
+            "survival_rate": survival_rate,
             "warning_analytics": warning_info,
             "model_info": {
                 "sentinel2_used": sentinel_fetcher.use_sentinelhub,

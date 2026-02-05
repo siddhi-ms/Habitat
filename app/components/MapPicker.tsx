@@ -66,7 +66,7 @@ export default function MapPicker() {
           species: tree,
           user_id: user.id,
           status: "Active",
-          survival_rate: "100%",
+          survival_rate: `${predictionResult.survival_rate}%`,
           prediction_result: predictionResult,
         }])
         .select();
