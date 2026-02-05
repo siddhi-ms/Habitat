@@ -51,11 +51,11 @@ export default function SimulationPage() {
   const currentSoilWeather = selectedCity ? soilData.get(selectedCity) : null;
   const maturityYears = selectedSpecies ? getMaturityYears(selectedSpecies, simulationYears) : simulationYears;
   const currentStage = selectedSpecies && currentSoilWeather ? getCurrentStage(currentYear, maturityYears) : null;
-  const carbonSeq = selectedSpecies && currentSoilWeather 
-    ? calculateCarbonSequestration(selectedSpecies, currentSoilWeather, currentYear, maturityYears) 
+  const carbonSeq = selectedSpecies && currentSoilWeather
+    ? calculateCarbonSequestration(selectedSpecies, currentSoilWeather, currentYear, maturityYears)
     : 0;
-  const healthStatusLabel = selectedSpecies && currentSoilWeather 
-    ? getHealthStatusLabel(currentYear / maturityYears) 
+  const healthStatusLabel = selectedSpecies && currentSoilWeather
+    ? getHealthStatusLabel(currentYear / maturityYears)
     : "Unknown";
 
   if (loading) {
@@ -77,20 +77,21 @@ export default function SimulationPage() {
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-zinc-900 via-emerald-950 to-zinc-900 text-zinc-50 p-8">
       <div className="h-full overflow-y-auto pb-12">
-      {/* Header */}
-      <div className="max-w-7xl mx-auto mb-8">
-        <div className="rounded-2xl border border-white/10 bg-black/30 px-6 py-4 backdrop-blur">
-          <div className="text-xs font-medium tracking-wide text-emerald-400 uppercase">
-            HABITAT • ADVANCED SIMULATION
-          </div>
-          <div className="flex gap-4">
-            <div className="text-right">
-              <p className="text-[10px] uppercase tracking-widest text-zinc-500">Active Species</p>
-              <p className="font-medium text-emerald-400">{selectedSpecies.species_name}</p>
+        {/* Header */}
+        <header className="max-w-7xl mx-auto mb-8">
+          <div className="rounded-2xl border border-white/10 bg-black/30 px-6 py-4 backdrop-blur">
+            <div className="text-xs font-medium tracking-wide text-emerald-400 uppercase">
+              HABITAT • ADVANCED SIMULATION
             </div>
-            <div className="text-right border-l border-white/10 pl-4">
-              <p className="text-[10px] uppercase tracking-widest text-zinc-500">Location</p>
-              <p className="font-medium text-zinc-200">{selectedCity}</p>
+            <div className="flex gap-4">
+              <div className="text-right">
+                <p className="text-[10px] uppercase tracking-widest text-zinc-500">Active Species</p>
+                <p className="font-medium text-emerald-400">{selectedSpecies.species_name}</p>
+              </div>
+              <div className="text-right border-l border-white/10 pl-4">
+                <p className="text-[10px] uppercase tracking-widest text-zinc-500">Location</p>
+                <p className="font-medium text-zinc-200">{selectedCity}</p>
+              </div>
             </div>
           </div>
         </header>
@@ -142,13 +143,13 @@ export default function SimulationPage() {
         />
 
         {/* Timeline Slider - FIXED */}
-      <div className="rounded-xl border border-white/10 bg-black/20 p-6 backdrop-blur">
-        <TimelineSlider
-          currentYear={currentYear}
-          maxYears={simulationYears} // <--- CHANGE THIS from 'maturityYears' to 'simulationYears'
-          onChange={setCurrentYear}
-        />
-      </div>
+        <div className="rounded-xl border border-white/10 bg-black/20 p-6 backdrop-blur">
+          <TimelineSlider
+            currentYear={currentYear}
+            maxYears={simulationYears} // <--- CHANGE THIS from 'maturityYears' to 'simulationYears'
+            onChange={setCurrentYear}
+          />
+        </div>
 
         {/* Metrics Section */}
         {currentStage && (
@@ -223,7 +224,6 @@ export default function SimulationPage() {
             </div>
           </div>
         </div>
-      </div>
       </div>
     </div>
   );
