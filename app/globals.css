@@ -1,3 +1,4 @@
+/* app/globals.css */
 @import "tailwindcss";
 
 :root {
@@ -58,12 +59,14 @@ body:has(.map-container) html {
 /* Next.js App Router wrapper - only full height for map pages */
 body:has(.map-container) main {
   height: 100%;
-  width: 100%;
+  border-radius: 2rem;
 }
 
-/* Ensure MapLibre canvas is always visible */
-.maplibregl-canvas {
-  width: 100% !important;
-  height: 100% !important;
-  outline: none;
+/* Keep your custom overrides here though! */
+.leaflet-container {
+  width: 100%;
+
+html, body {
+  min-height: 100vh;
+  overflow-y: auto; /* Ensure you can scroll! */
 }

@@ -13,6 +13,7 @@ import {
   getHealthStatusLabel,
 } from "../utils/lifecycleUtils";
 
+// CRITICAL: This must be a default export
 export default function SimulationPage() {
   const [trees, setTrees] = useState<TreeSpecies[]>([]);
   const [soilData, setSoilData] = useState<Map<string, SoilWeatherSummary>>(new Map());
@@ -26,23 +27,17 @@ export default function SimulationPage() {
   useEffect(() => {
     async function loadData() {
       try {
-        // Load tree species data
         const treeData = await parseTreesCSV();
         setTrees(treeData);
-        if (treeData.length > 0) {
-          setSelectedSpecies(treeData[0]);
-        }
+        if (treeData.length > 0) setSelectedSpecies(treeData[0]);
 
-        // Load soil weather data
         const weatherData = await parseSoilWeatherCSV();
         const aggregated = aggregateSoilWeatherByCity(weatherData);
         setSoilData(aggregated);
 
         const cityList = Array.from(aggregated.keys()).sort();
         setCities(cityList);
-        if (cityList.length > 0) {
-          setSelectedCity(cityList[0]);
-        }
+        if (cityList.length > 0) setSelectedCity(cityList[0]);
 
         setLoading(false);
       } catch (error) {
@@ -65,16 +60,16 @@ export default function SimulationPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-zinc-900 via-emerald-950 to-zinc-900 flex items-center justify-center">
-        <div className="text-emerald-400 text-xl">Loading ecosystem data...</div>
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+        <div className="animate-pulse text-emerald-400 font-mono tracking-widest">LOADING ECOSYSTEM_DATA...</div>
       </div>
     );
   }
 
   if (!selectedSpecies || !currentSoilWeather) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-zinc-900 via-emerald-950 to-zinc-900 flex items-center justify-center">
-        <div className="text-red-400 text-xl">Unable to load data</div>
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-red-400">
+        DATA_CONNECTION_ERROR
       </div>
     );
   }
@@ -88,88 +83,57 @@ export default function SimulationPage() {
           <div className="text-xs font-medium tracking-wide text-emerald-400 uppercase">
             HABITAT • ADVANCED SIMULATION
           </div>
-          <div className="mt-1 text-2xl font-semibold tracking-tight">
-            Tree Lifecycle Growth Simulation
+          <div className="flex gap-4">
+            <div className="text-right">
+              <p className="text-[10px] uppercase tracking-widest text-zinc-500">Active Species</p>
+              <p className="font-medium text-emerald-400">{selectedSpecies.species_name}</p>
+            </div>
+            <div className="text-right border-l border-white/10 pl-4">
+              <p className="text-[10px] uppercase tracking-widest text-zinc-500">Location</p>
+              <p className="font-medium text-zinc-200">{selectedCity}</p>
+            </div>
           </div>
-          <div className="mt-2 text-sm text-zinc-300">
-            Real soil & weather data • Species-specific lifecycles • Dynamic environmental impact modeling
-          </div>
-        </div>
-      </div>
+        </header>
 
-      {/* Controls */}
-      <div className="max-w-7xl mx-auto mb-6">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {/* Species Selector */}
-          <div className="rounded-xl border border-white/10 bg-black/20 p-4 backdrop-blur">
-            <label className="text-xs font-semibold tracking-wide text-zinc-400 uppercase block mb-2">
-              Select Tree Species
-            </label>
+        {/* Top Controls Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white/5 border border-white/10 p-4 rounded-2xl">
+            <label className="text-[10px] font-bold text-zinc-500 uppercase block mb-2">Species</label>
             <select
               value={selectedSpecies.species_name}
               onChange={(e) => {
-                const species = trees.find((t) => t.species_name === e.target.value);
-                if (species) {
-                  setSelectedSpecies(species);
-                  setCurrentYear(0);
-                }
+                const s = trees.find((t) => t.species_name === e.target.value);
+                if (s) { setSelectedSpecies(s); setCurrentYear(0); }
               }}
-              className="w-full px-4 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+              className="w-full bg-zinc-900 border-none rounded-lg text-sm p-2 focus:ring-2 focus:ring-emerald-500"
             >
-              {trees.map((tree) => (
-                <option key={tree.species_name} value={tree.species_name}>
-                  {tree.species_name} ({tree.growth_fast ? "Fast" : tree.growth_medium ? "Medium" : "Slow"})
-                </option>
-              ))}
+              {trees.map((t) => <option key={t.species_name} value={t.species_name}>{t.species_name}</option>)}
             </select>
           </div>
 
-          {/* Location Selector */}
-          <div className="rounded-xl border border-white/10 bg-black/20 p-4 backdrop-blur">
-            <label className="text-xs font-semibold tracking-wide text-zinc-400 uppercase block mb-2">
-              Select Location
-            </label>
+          <div className="bg-white/5 border border-white/10 p-4 rounded-2xl">
+            <label className="text-[10px] font-bold text-zinc-500 uppercase block mb-2">Environment</label>
             <select
               value={selectedCity}
-              onChange={(e) => {
-                setSelectedCity(e.target.value);
-                setCurrentYear(0);
-              }}
-              className="w-full px-4 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+              onChange={(e) => { setSelectedCity(e.target.value); setCurrentYear(0); }}
+              className="w-full bg-zinc-900 border-none rounded-lg text-sm p-2 focus:ring-2 focus:ring-emerald-500"
             >
-              {cities.map((city) => (
-                <option key={city} value={city}>
-                  {city}
-                </option>
-              ))}
+              {cities.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
 
-          {/* Simulation Duration */}
-          <div className="rounded-xl border border-white/10 bg-black/20 p-4 backdrop-blur">
-            <label className="text-xs font-semibold tracking-wide text-zinc-400 uppercase block mb-2">
-              Simulation Duration: {simulationYears} years
-            </label>
+          <div className="bg-white/5 border border-white/10 p-4 rounded-2xl">
+            <label className="text-[10px] font-bold text-zinc-500 uppercase block mb-2">Max Life: {simulationYears}y</label>
             <input
-              type="range"
-              min="5"
-              max="50"
-              step="5"
+              type="range" min="5" max="100" step="5"
               value={simulationYears}
-              onChange={(e) => {
-                setSimulationYears(parseInt(e.target.value));
-                setCurrentYear(0);
-              }}
-              className="w-full"
+              onChange={(e) => { setSimulationYears(parseInt(e.target.value)); setCurrentYear(0); }}
+              className="w-full accent-emerald-500"
             />
-            <div className="mt-1 text-xs text-zinc-500">Maturity in ~{maturityYears.toFixed(0)} years</div>
           </div>
         </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Tree Visualization */}
+        {/* Tree Visual Core */}
         <TreeLifecycle
           species={selectedSpecies}
           soilWeather={currentSoilWeather}
@@ -186,7 +150,7 @@ export default function SimulationPage() {
         />
       </div>
 
-        {/* Metrics Panel */}
+        {/* Metrics Section */}
         {currentStage && (
           <MetricsPanel
             stage={currentStage}

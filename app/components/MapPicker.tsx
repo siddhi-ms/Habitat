@@ -29,41 +29,48 @@ export default function MapPicker() {
   const treeList = ["Neem", "Banyan", "Peepal", "Teak", "Sal", "Arjun", "Amla", "Bamboo", "Jamun", "Mango"];
 
   // Logic to save to Supabase
-  const handleDeploy = async () => {
-    if (!projectName || !coord) return;
-    
-    setIsDeploying(true);
-    try {
-      // 1. Get the current user
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) throw new Error("Authentication required");
+// Inside MapPicker component...
 
-      // 2. Insert into 'projects' table
-      const { error } = await supabase
-        .from('projects')
-        .insert([{
-          name: projectName,
-          lat: coord.lat,
-          lng: coord.lng,
-          altitude: altitude,
-          species: tree,
-          user_id: user.id, // Links project to the logged-in user
-          status: "Active",
-          survival_rate: "100%" // Initial starting value
-        }]);
+const handleDeploy = async () => {
+  if (!projectName || !coord) return;
+  
+  setIsDeploying(true);
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Authentication required");
 
-      if (error) throw error;
+    // 1. Insert into Supabase
+    const { data, error } = await supabase
+      .from('projects')
+      .insert([{
+        name: projectName,
+        lat: coord.lat,
+        lng: coord.lng,
+        altitude: altitude,
+        species: tree,
+        user_id: user.id,
+        status: "Active",
+        survival_rate: "100%"
+      }])
+      .select(); // Added .select() to get the new project ID
 
-      // 3. Redirect back to dashboard on success
-      router.push('/dashboard');
-      router.refresh();
-    } catch (err: any) {
-      alert(`Deployment failed: ${err.message}`);
-    } finally {
-      setIsDeploying(false);
-    }
-  };
+    if (error) throw error;
+
+    // 2. Navigate to the CARE PAGE
+    // We pass the tree, lat, and altitude in the URL
+    const params = new URLSearchParams({
+      species: tree.toLowerCase(),
+      lat: coord.lat.toString(),
+      alt: altitude.replace(/[^0-9]/g, '') // Send only the number
+    });
+
+    router.push(`/newproject/care?${params.toString()}`);
+  } catch (err: any) {
+    alert(`Deployment failed: ${err.message}`);
+  } finally {
+    setIsDeploying(false);
+  }
+};
 
   function LocationMarker() {
     useMapEvents({
